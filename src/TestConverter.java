@@ -1,5 +1,5 @@
 // This is the TestConverter Class which converts an integer to a longword, represented
-// by 32 bits and to convert a longword to an integer. [HI!]
+// by 32 bits and to convert a longword to an integer.
 public class TestConverter {
 
     /**

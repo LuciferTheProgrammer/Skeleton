@@ -7,7 +7,7 @@ public class Adder {
      * bit by bit. This is achieved by first negating all the bits of instance b
      * using the bit wise NOT method and then creates an instance of the Word32 which
      * represents the value 1. Then the negated instance b and 1 are added to instance
-     * a to get the final resulting bits. [DAVID!]
+     * a to get the final resulting bits.
      *
      * @param a The instance to hold bits of size 32.
      * @param b The instance to hold bits of size 32.
