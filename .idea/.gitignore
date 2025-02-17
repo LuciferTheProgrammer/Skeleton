@@ -1,0 +1,13 @@
+# Default ignored files
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Editor-based HTTP Client requests
+/httpRequests/
+
+/dataSources/
+/dataSources.local.xml
+
+# Exclude the unwanted project folder
+/Tran\ Skeleton\ -\ Spring\ 2025/
