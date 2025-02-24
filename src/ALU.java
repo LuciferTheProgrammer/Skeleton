@@ -9,11 +9,7 @@ public class ALU {
     public void doInstruction() {
         result = new Word32();
         int startingOpCode = 0;
-        for (int i = 0; i < 5; i++) {
-            startingOpCode *= 2;
-            if (instruction.word16[i].getValue() == Bit.boolValues.TRUE)
-                startingOpCode += 1;
-        }
+        startingOpCode = returnOpcode(startingOpCode);
         switch (startingOpCode) {
             case 1:
                 Adder.add(op1, op2, result);
@@ -113,5 +109,13 @@ public class ALU {
             }
         }
         return 0;
+    }
+    public int returnOpcode(int startingOpCode) {
+        for (int i = 0; i < 5; i++) {
+            startingOpCode *= 2;
+            if (instruction.word16[i].getValue() == Bit.boolValues.TRUE)
+                startingOpCode += 1;
+        }
+        return startingOpCode;
     }
 }
