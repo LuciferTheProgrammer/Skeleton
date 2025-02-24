@@ -7,8 +7,7 @@ public class ALU {
     public Bit equal = new Bit(false);
 
     public void doInstruction() {
-        for(int i = 0; i < 32; i++)
-            result.word32[i].assign(Bit.boolValues.FALSE);
+        result = new Word32();
         int startingOpCode = 0;
         for (int i = 0; i < 5; i++) {
             startingOpCode *= 2;
