@@ -66,7 +66,7 @@ public class Assembler {
             String [] tokenizer = str.split("\\s+");
             if(opCode.containsKey(tokenizer[0])) {
                 if(tokenizer.length == 1) {
-                    switch(tokenizer[0]) {
+                    switch (tokenizer[0]) {
                         case "halt":
                             assembled.add("ffffffffffffffff");
                             break;
@@ -74,6 +74,7 @@ public class Assembler {
                             assembled.add(opCode.get(tokenizer[0]) + "fffffffffff");
                             break;
                     }
+                }
                 if(tokenizer.length == 2) {
                     switch(tokenizer[0]) {
                         case "syscall":
@@ -109,7 +110,6 @@ public class Assembler {
                     }
                     else
                         assembled.add(opCode.get(tokenizer[0]) + "t" + convertedValue5(tokenizer[1])+ register.get(tokenizer[2]));
-                }
                 }
             }
         }
