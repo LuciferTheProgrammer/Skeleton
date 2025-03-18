@@ -117,8 +117,22 @@ public class Assembler {
     }
 
     public static String[] finalOutput(String[] input) {
-
-        return null;
+        LinkedList<String> output = new LinkedList<>();
+        if(input.length % 2 != 0) {
+            String [] temp = new String[input.length + 1];
+            for(int i = 0; i < input.length; i++) {
+                temp[i] = input[i];
+            }
+            temp[temp.length - 1] = "ffffffffffffffff";
+            for(int i = 0; i < temp.length - 1; i++) {
+                output.add(temp[i] + temp[i + 1]);
+            }
+        }
+        else
+            for (int i = 0; i < input.length - 1; i++) {
+                output.add(input[i] + input[i + 1]);
+            }
+        return output.toArray(new String[0]);
     }
 
     public static String convertedValue11(String input) {
