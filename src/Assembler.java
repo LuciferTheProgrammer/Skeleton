@@ -62,8 +62,7 @@ public class Assembler {
         register.put("r31", "ttttt");
 
         for(int i = 0; i < input.length; i++) {
-            String str = input[i].trim();
-            String [] tokenizer = str.split("\\s+");
+            String [] tokenizer = input[i].split(" ");
             if(opCode.containsKey(tokenizer[0])) {
                 if(tokenizer.length == 1) {
                     switch (tokenizer[0]) {
@@ -118,6 +117,7 @@ public class Assembler {
     }
 
     public static String[] finalOutput(String[] input) {
+
         return null;
     }
 
