@@ -112,8 +112,7 @@ public class Assembler {
                 }
             }
         }
-        String [] value = assembled.toArray(new String[0]);
-        return value;
+        return assembled.toArray(new String[0]);
     }
 
     public static String[] finalOutput(String[] input) {
