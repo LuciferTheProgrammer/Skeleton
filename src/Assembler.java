@@ -123,7 +123,7 @@ public class Assembler {
             }
         }
         else {
-            String [] temp = new String[input.length + 1];
+            String[] temp = new String[input.length + 1];
             for(int i = 0; i < input.length; i++) {
                 temp[i] = input[i];
             }
