@@ -1,7 +1,25 @@
 import java.util.HashMap;
 import java.util.LinkedList;
 
+// The Assembler Class has an assemble method that takes in a set of instructions as an
+// array of Strings, which is then tokenized and outputs an array of bit Strings (16 t's and/or f's).
+// Then finally has a final output method which takes in an array of Strings and merges each consecutive
+// 2 line Strings into one and then returns an array of Strings with merged 32 bit lines.
 public class Assembler {
+
+    /**
+     * This method creates a Linked List to hold the assembled bit Strings of length 16, a
+     * Hash Map to hold the op code and another Hash Map to hold the registers. Then this method
+     * takes in an array of Strings which gets tokenized. Then the first token is utilized to look up
+     * any matching keys on the Hash Map for the op code, if there is a match then depending on the number
+     * of tokens for that specific String (length 1, 2, or 3), a branch case generates and appends
+     * a bit String of length 16 to the Linked List. Once all the Strings have been processed, then
+     * the Linked List of assembled bit Strings of length 16 is converted to an array of Strings which is
+     * then returned.
+     *
+     * @param input The array of Strings, instructions.
+     * @return The array of Strings, bit Strings of length 16.
+     */
     public static String[] assemble(String[] input) {
         LinkedList <String> assembled = new LinkedList<>();
         HashMap <String, String> opCode = new HashMap<>();
@@ -115,6 +133,16 @@ public class Assembler {
         return assembled.toArray(new String[0]);
     }
 
+    /**
+     * This method creates a Linked List to hold the resulting merged 32 bit line Strings. This
+     * method takes in an array of Strings and merges each consecutive 2 lines into one line of String
+     * which is then appended to the Linked List. If the length of the array of Strings is odd, a 16 bit
+     * ("ffffffffffffffff") is added at the end to make it even. Finally, the Linked List of the result
+     * is converted to an array of Strings which is then returned.
+     *
+     * @param input The array of Strings.
+     * @return The resulting 32 bit line(s) array of Strings.
+     */
     public static String[] finalOutput(String[] input) {
         LinkedList<String> output = new LinkedList<>();
         if(input.length % 2 == 0) {
@@ -135,6 +163,16 @@ public class Assembler {
         return output.toArray(new String[0]);
     }
 
+    /**
+     * This method takes in a String which is then converted to an integer. In addition, the integer
+     * is then converted to its 11 bit String binary representation through divisions of 2 by taking the
+     * remainder for each iteration. If the remainder is 0 then a String representation of "f" is appended
+     * to the resulting String. Otherwise, "t" is appended to the resulting String. Finally, the resulting
+     * String is returned.
+     *
+     * @param input The String to be processed.
+     * @return The 11 bit String binary representation.
+     */
     public static String convertedValue11(String input) {
         StringBuilder returnValue = new StringBuilder();
         int holder = Integer.parseInt(input);
@@ -150,6 +188,17 @@ public class Assembler {
         }
         return returnValue.reverse().toString();
     }
+
+    /**
+     * This method takes in a String which is then converted to an integer. In addition, the integer
+     * is then converted to its 5 bit String binary representation through divisions of 2 by taking the
+     * remainder for each iteration. If the remainder is 0 then a String representation of "f" is appended
+     * to the resulting String. Otherwise, "t" is appended to the resulting String. Finally, the resulting
+     * String is returned.
+     *
+     * @param input The String to be processed.
+     * @return The 5 bit String binary representation.
+     */
     public static String convertedValue5(String input) {
         StringBuilder returnValue = new StringBuilder();
         int holder = Integer.parseInt(input);
