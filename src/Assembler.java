@@ -146,7 +146,7 @@ public class Assembler {
     public static String[] finalOutput(String[] input) {
         LinkedList<String> output = new LinkedList<>();
         if(input.length % 2 == 0) {
-            for(int i = 0; i < input.length - 1; i++) {
+            for(int i = 0; i < input.length - 1; i+=2) {
                 output.add(input[i] + input[i + 1]);
             }
         }
@@ -156,7 +156,7 @@ public class Assembler {
                 temp[i] = input[i];
             }
             temp[temp.length - 1] = "ffffffffffffffff";
-            for (int i = 0; i < temp.length - 1; i++) {
+            for (int i = 0; i < temp.length - 1; i+=2) {
                 output.add(temp[i] + temp[i + 1]);
             }
         }
