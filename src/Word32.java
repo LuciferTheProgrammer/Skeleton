@@ -220,13 +220,10 @@ public class Word32 {
      * @return The values of the 32 bits.
      */
     public String toString() {
-        int counter = 0;
         StringBuilder sb = new StringBuilder();
         for (Bit bit : word32) {
             sb.append(bit.toString());
-            counter++;
-            if(counter < word32.length)
-                sb.append(",");
+            sb.append(",");
         }
         return sb.toString();
     }

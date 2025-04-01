@@ -5,9 +5,13 @@ public class Processor {
     private Word32 holder = new Word32();
     private ALU alu = new ALU();
     private int statusOfFetch = 0;
+    private int opCode = 0;
     private boolean halt = false;
+    private int programCounter = 0;
     private Word32[] registers = new Word32[32];
     public List<String> output = new LinkedList<>();
+    private  Stack<Integer> callAndReturn = new Stack<>();
+    private int update = 0;
 
 
     public Processor(Memory m) {
@@ -40,7 +44,6 @@ public class Processor {
     }
 
     private void decode() {
-        int opCode = 0;
         opCode = alu.returnOpcode(opCode);
         if(opCode == 0)
             halt = true;
@@ -71,6 +74,41 @@ public class Processor {
     }
 
     private void execute() {
+        if(opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 || opCode == 5
+        || opCode == 6 || opCode == 7 || opCode == 11) {
+            alu.doInstruction();
+        }
+
+        else if(opCode == 18) {
+            Adder.add(alu.op1, alu.op2, mem.address);
+            mem.read();
+        }
+        else if(opCode == 19) {
+                alu.op2.copy(mem.address);
+                alu.op1.copy(mem.value);
+                mem.write();
+        }
+        else if(opCode == 8) {
+            int codeHolder = TestConverter.toInt(alu.op1);
+            if(codeHolder == 0)
+                for(int i = 0; i < 32; i++) {
+                    System.out.print(registers[i].toString());
+                }
+            else
+                System.out.print(mem.toString());
+        }
+        else if(opCode == 9) {
+            int container = TestConverter.toInt(alu.op1);
+            update = programCounter + container;
+            callAndReturn.push(programCounter + 1);
+        }
+        else if(opCode == 10) {
+            update = callAndReturn.pop();
+        }
+        else if(opCode == 12 || opCode == 13 || opCode == 14 || opCode == 15
+                || opCode == 16 || opCode == 17) {
+            if(alu.less)
+        }
     }
 
     private void printReg() {

@@ -197,13 +197,10 @@ public class Word16 {
      * @return The values of the 16 bits.
      */
     public String toString() {
-        int counter = 0;
         StringBuilder sb = new StringBuilder();
         for (Bit bit : word16) {
             sb.append(bit.toString());
-            counter++;
-            if(counter < word16.length)
-                sb.append(",");
+            sb.append(",");
         }
         return sb.toString();
     }

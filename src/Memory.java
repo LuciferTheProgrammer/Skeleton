@@ -95,4 +95,12 @@ public class Memory {
         }
         return accumulator;
     }
+
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < dram.length; i++) {
+            builder.append(dram[i].toString());
+        }
+        return builder.toString();
+    }
 }
