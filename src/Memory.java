@@ -20,12 +20,10 @@ public class Memory {
     public int addressAsInt() {
         int accumulator  = 0;
         for(int i  = 0; i < 32; i++) {
-            if(accumulator > 999)
-                break;
             if((address.word32[i].getValue() == Bit.boolValues.TRUE))
                 accumulator += calculate2Raised(31 - i);
         }
-        return accumulator;
+        return accumulator % 1000;
     }
 
     /**
@@ -94,13 +92,5 @@ public class Memory {
             accumulator *= 2;
         }
         return accumulator;
-    }
-
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        for(int i = 0; i < dram.length; i++) {
-            builder.append(dram[i].toString());
-        }
-        return builder.toString();
     }
 }
