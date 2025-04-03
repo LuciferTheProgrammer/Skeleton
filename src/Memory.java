@@ -18,12 +18,15 @@ public class Memory {
      * @return The memory location.
      */
     public int addressAsInt() {
-        int accumulator  = 0;
+        long accumulator  = 0;
         for(int i  = 0; i < 32; i++) {
             if((address.word32[i].getValue() == Bit.boolValues.TRUE))
                 accumulator += calculate2Raised(31 - i);
         }
-        return accumulator % 1000;
+        int index = (int) (accumulator % 1000);
+        if(index < 0)
+            index += 1000;
+        return index;
     }
 
     /**
@@ -86,8 +89,8 @@ public class Memory {
      * @param value The frequency the base is multiplied by 2.
      * @return The accumulated value.
      */
-    public int calculate2Raised(int value) {
-        int accumulator = 1;
+    public long calculate2Raised(int value) {
+        long accumulator = 1;
         for(int i = 0; i < value ; i++) {
             accumulator *= 2;
         }
