@@ -55,6 +55,7 @@ public class Processor {
             decode();
             execute();
             store();
+            System.out.println("OpCode: " + opCode);
         }
     }
 
@@ -75,7 +76,7 @@ public class Processor {
 
     private void decode() {
         opCode = returnOpcodeProcessor(instruction);
-        if(opCode == 10) {
+        if(opCode == 0 || opCode == 10) {
             //Do Nothing
         }
         else if(opCode == 8 || opCode == 9 || opCode == 12 || opCode == 13 ||
@@ -97,7 +98,6 @@ public class Processor {
                 placement.copy(op2);
             }
         }
-        changeInProgramCounter = false;
     }
 
     private void execute() {
@@ -105,17 +105,22 @@ public class Processor {
             halt = true;
         }
         else if(opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 || opCode == 5
-            || opCode == 6 || opCode == 7 || opCode == 11) {
+                || opCode == 6 || opCode == 7) {
             ALU alu = new ALU();
             op1.copy(alu.op1);
             op2.copy(alu.op2);
             instruction.copy(alu.instruction);
             alu.doInstruction();
-            if(opCode == 11) {
-                lessHolder.assign(alu.less.getValue());
-                equalHolder.assign(alu.equal.getValue());
-            }
             alu.result.copy(result);
+        }
+        else if(opCode == 11) {
+            ALU alu = new ALU();
+            op1.copy(alu.op1);
+            op2.copy(alu.op2);
+            instruction.copy(alu.instruction);
+            alu.doInstruction();
+            lessHolder.assign(alu.less.getValue());
+            equalHolder.assign(alu.equal.getValue());
         }
         else if (opCode == 8) {
             switch(immediate) {
@@ -124,7 +129,6 @@ public class Processor {
             }
         }
         else if(opCode == 9) {
-            stack.push(programCounter + 1);
             changeInProgramCounter = true;
         }
         else if(opCode == 10) {
@@ -137,17 +141,20 @@ public class Processor {
         else if (opCode == 18) {
             if(instruction.word16[5].getValue() == Bit.boolValues.FALSE) {
                 op2.copy(mem.address);
-                mem.read();
-                mem.value.copy(result);
             }
             else if(instruction.word16[5].getValue() == Bit.boolValues.TRUE) {
                 Adder.add(op2, op1, mem.address);
-                mem.read();
-                mem.value.copy(result);
             }
+            mem.read();
+            mem.value.copy(result);
         }
         else if(opCode == 19) {
-            registers[destination].copy(mem.address);
+            if(instruction.word16[5].getValue() == Bit.boolValues.TRUE) {
+                Adder.add(registers[destination], op2, mem.address);
+            }
+            else {
+                registers[destination].copy(mem.address);
+            }
             registers[source].copy(mem.value);
             mem.write();
             mem.value.copy(result);
@@ -181,14 +188,18 @@ public class Processor {
     }
 
     private void store() {
+        if(opCode == 8) {
+            //Do Nothing
+        }
         if(opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 || opCode == 5
-            || opCode == 6 || opCode == 7 || opCode == 11 || opCode == 18 ||
-            opCode == 20) {
+                || opCode == 6 || opCode == 7 || opCode == 18 ||
+                opCode == 20) {
             result.copy(registers[destination]);
         }
         if(changeInProgramCounter) {
             switch(opCode) {
                 case 9 -> {
+                    stack.push(programCounter + 1);
                     programCounter += immediate;
                 }
                 case 10 -> {
