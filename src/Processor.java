@@ -23,6 +23,7 @@ public class Processor {
     private Bit equalHolder;
     public List<String> output = new LinkedList<>();
     private int flagger;
+    private boolean container;
 
 
     public Processor(Memory m) {
@@ -47,6 +48,7 @@ public class Processor {
         buffer = null;
         instruction = new Word16();
         flagger = 0;
+        container = false;
     }
 
     public void run() {
@@ -55,10 +57,9 @@ public class Processor {
             decode();
             execute();
             store();
-            System.out.println("OpCode: " + opCode);
+            System.out.println("opCode: " + opCode);
         }
     }
-
     private void fetch() {
         if(flagger == 0) {
             buffer = new Word32();
@@ -67,11 +68,14 @@ public class Processor {
             mem.value.copy(buffer);
             buffer.getTopHalf(instruction);
             flagger = 1;
+            container = true;
         }
         else {
             buffer.getBottomHalf(instruction);
             flagger = 0;
+            container = false;
         }
+        System.out.println("Fetched instruction at PC=" + programCounter + " (" + (container ? "top" : "bottom") + " half): " + instruction.toString());
     }
 
     private void decode() {
@@ -82,6 +86,8 @@ public class Processor {
         else if(opCode == 8 || opCode == 9 || opCode == 12 || opCode == 13 ||
                 opCode == 14 || opCode == 15 || opCode == 16 || opCode == 17) {
             immediate = immediateValue11(instruction);
+            System.out.println("Call Instruction decoded: " + instruction.toString() +
+                    ", Immediate: " + immediate);
         }
         else {
             if(instruction.word16[5].getValue() == Bit.boolValues.FALSE) {
@@ -121,6 +127,8 @@ public class Processor {
             alu.doInstruction();
             lessHolder.assign(alu.less.getValue());
             equalHolder.assign(alu.equal.getValue());
+            System.out.println("Compare executed. Less: " + lessHolder.getValue() + ", Equal: " + equalHolder.getValue());
+
         }
         else if (opCode == 8) {
             switch(immediate) {
@@ -157,7 +165,7 @@ public class Processor {
             }
             registers[source].copy(mem.value);
             mem.write();
-            mem.value.copy(result);
+            //mem.value.copy(result);
         }
         else if(opCode == 20) {
             op2.copy(result);
@@ -181,7 +189,8 @@ public class Processor {
             addr.copy(mem.address);
             mem.read();
             mem.value.copy(value);
-            var line = i + ":" + value + "(" + TestConverter.toInt(value) + ")";
+            //var line = i + ":" + value + "(" + TestConverter.toInt(value) + ")";
+            var line = i + ":" + value.toString();
             output.add(line);
             System.out.println(line);
         }
@@ -196,60 +205,80 @@ public class Processor {
                 opCode == 20) {
             result.copy(registers[destination]);
         }
+        //System.out.print("Immediate: " + immediate + " arithmetic/logic.");
         if(changeInProgramCounter) {
+            changeInProgramCounter = false;
+            //System.out.print("Immediate: " + immediate + "on call/return/branch.");
             switch(opCode) {
                 case 9 -> {
+                    System.out.println("Call encountered. PC before: " + programCounter + ", immediate: " + immediate);
                     stack.push(programCounter + 1);
-                    programCounter += immediate;
+                    programCounter += immediate;    // Immediate is in word units
+                    //programCounter += immediate;     // immediate is in instruction slots
+                    System.out.println("Call completed. New PC: " + programCounter + ", Stack top: " + stack.peek());
+
                 }
                 case 10 -> {
-                    programCounter = stack.pop();
+                    int ret = stack.pop();
+                    //programCounter = stack.pop();
+                    System.out.println("Return encountered. Popped return address: " + programCounter);
+                    programCounter = ret;
+                    flagger = 0;
+                    container = true;
                 }
                 case 12 -> {
                     if (lessHolder.getValue() == Bit.boolValues.TRUE || equalHolder.getValue() == Bit.boolValues.TRUE) {
-                        programCounter += immediate;
+                        programCounter += immediate;     // immediate is in instruction slots
                     } else
                         programCounter++;
                 }
                 case 13 -> {
                     if (lessHolder.getValue() == Bit.boolValues.TRUE) {
-                        programCounter += immediate;
+                        programCounter += immediate;     // immediate is in instruction slots
                     }
                     else
                         programCounter++;
                 }
                 case 14  -> {
                     if(lessHolder.getValue() == Bit.boolValues.FALSE) {
-                        programCounter += immediate;
+                        programCounter += immediate;     // immediate is in instruction slots
                     }
                     else
                         programCounter++;
                 }
                 case 15 -> {
                     if (lessHolder.getValue() == Bit.boolValues.FALSE && equalHolder.getValue() == Bit.boolValues.FALSE) {
-                        programCounter += immediate;
+                         programCounter += immediate;     // immediate is in instruction slots
                     }
                     else
                         programCounter++;
                 }
                 case 16 -> {
                     if (equalHolder.getValue() == Bit.boolValues.TRUE) {
-                        programCounter += immediate;
+                         programCounter += immediate;     // immediate is in instruction slots
                     }
                     else
                         programCounter++;
                 }
                 case 17 -> {
+                    System.out.println("BNE encountered. PC before: " + programCounter + ", immediate: " + immediate +
+                            ", Equal flag: " + equalHolder.getValue());
                     if(equalHolder.getValue() == Bit.boolValues.FALSE) {
-                        programCounter += immediate;
+                        programCounter += immediate;     // immediate is in instruction slots
                     }
                     else
                         programCounter++;
+                    System.out.println("BNE completed. New PC: " + programCounter);
+
                 }
             }
         }
-        else
-            programCounter++;
+        else {
+            if(!container)
+                programCounter++;
+        }
+        System.out.println("Store completed. New PC: " + programCounter);
+
     }
 
     public int returnOpcodeProcessor(Word16 sample) {
