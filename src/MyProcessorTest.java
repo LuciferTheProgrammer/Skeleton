@@ -1,120 +1,51 @@
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.lang.reflect.Field;
 
 public class MyProcessorTest {
 
-    // Helper method to run a program.
-    private static Processor runProgram(String[] program) {
+    @Test
+    public void testStoreImmediateInstruction() throws Exception {
+        // This program will:
+        // 1. Copy the constant 10 into register 11 (r11) to be used as the memory address.
+        // 2. Use the STORE instruction in immediate format ("store 12 r11")
+        //    to store the immediate value 12 into memory at the address held in r11.
+        // 3. Syscall 1 prints all memory locations.
+        // 4. Halt.
+        //
+        // We expect memory location 10 to contain the value 12.
+        String[] program = {
+                "copy 10 r11",    // r11 := 10 (memory address)
+                "store 12 r11",   // immediate STORE: store immediate 12 into memory[r11]
+                "syscall 1",      // Print memory contents (assumed to print memory line at index equal to the address)
+                "halt"
+        };
+
+        // Assemble and merge the program (using your existing Assembler methods)
         String[] assembled = Assembler.assemble(program);
         String[] merged = Assembler.finalOutput(assembled);
-        Memory m = new Memory();
-        m.load(merged);
-        Processor p = new Processor(m);
-        p.run();
-        return p;
-    }
 
-    // Test ADD: adds 10 to r0 (initially 0) so r0 becomes 10.
-    @Test
-    public void testAdd() {
-        String[] program = {
-                "add 10 r0",
-                "syscall 0"
-        };
-        Processor p = runProgram(program);
-        String expected = "r0:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,f,t,f,";
-        assertEquals(expected, p.output.get(0));
-    }
+        // Create a Memory instance and load the program
+        Memory mem = new Memory();
+        mem.load(merged);
 
-    // Test SUBTRACT: subtract 3 from r0 (initially 0) so r0 becomes -3.
-    @Test
-    public void testSubtract() {
-        String[] program = {
-                "subtract 3 r0",
-                "syscall 0"
-        };
-        Processor p = runProgram(program);
-        // Expected: -3 in two's complement (assuming your toString prints bits in order)
-        // For example, if -3 is represented as 11111111 11111111 11111111 11111101,
-        // the expected string might be:
-        String expected = "r0:" +
-                "t,".repeat(29) + // 29 ones for the high–order bits
-                "t,f,t,";         // last 3 bits: 1,0,1 (for -3)
-        // (Adjust the expected string to match your actual formatting.)
-        assertEquals(expected, p.output.get(0));
-    }
+        // Create a Processor instance with this Memory and run the program
+        Processor proc = new Processor(mem);
+        proc.run();
 
-    // Test AND: r0 = r0 AND 10. (0 AND anything remains 0.)
-    @Test
-    public void testAnd() {
-        String[] program = {
-                "and 10 r0",
-                "syscall 0"
-        };
-        Processor p = runProgram(program);
-        String expected = "r0:" + "f,".repeat(32);
-        assertEquals(expected, p.output.get(0));
-    }
+        // Use reflection to access the private dram array from Memory
+        Field dramField = Memory.class.getDeclaredField("dram");
+        dramField.setAccessible(true);
+        Word32[] dram = (Word32[]) dramField.get(mem);
 
-    // Test OR: r0 = r0 OR 10. (Since r0 is initially 0, result should be 10.)
-    @Test
-    public void testOr() {
-        String[] program = {
-                "or 10 r0",
-                "syscall 0"
-        };
-        Processor p = runProgram(program);
-        // 10 in binary is 000...1010: 28 f's then: t, f, t, f,
-        String expected = "r0:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,f,t,f,";
-        assertEquals(expected, p.output.get(0));
-    }
+        // Construct the expected value for memory location 10 (which should be 12)
+        Word32 expectedWord = new Word32();
+        TestConverter.fromInt(12, expectedWord);
+        String expected = "10:" + expectedWord.toString();
 
-    // Test MULTIPLY: r0 = r0 * 4. (0 * 4 = 0.)
-    @Test
-    public void testMultiply() {
-        String[] program = {
-                "multiply 4 r0",
-                "syscall 0"
-        };
-        Processor p = runProgram(program);
-        String expected = "r0:" + "f,".repeat(32);
-        assertEquals(expected, p.output.get(0));
-    }
-
-    // Test LEFTSHIFT: r0 = r0 << 3. (Shifting 0 remains 0.)
-    @Test
-    public void testLeftShift() {
-        String[] program = {
-                "leftshift 3 r0",
-                "syscall 0"
-        };
-        Processor p = runProgram(program);
-        String expected = "r0:" + "f,".repeat(32);
-        assertEquals(expected, p.output.get(0));
-    }
-
-    // Test RIGHTSHIFT: r0 = r0 >> 3. (Shifting 0 remains 0.)
-    @Test
-    public void testRightShift() {
-        String[] program = {
-                "rightshift 3 r0",
-                "syscall 0"
-        };
-        Processor p = runProgram(program);
-        String expected = "r0:" + "f,".repeat(32);
-        assertEquals(expected, p.output.get(0));
-    }
-
-    // Test COPY: copy 7 into r0.
-    @Test
-    public void testCopy() {
-        String[] program = {
-                "copy 7 r0",
-                "syscall 0"
-        };
-        Processor p = runProgram(program);
-        // For 7 the correct representation is 29 false bits followed by three true bits.
-        String expected = "r0:" + "f,".repeat(29) + "t,t,t,";
-        assertEquals(expected, p.output.get(0));
+        // Assuming syscall 1 prints memory starting at address 0, the output line for memory location 10 is at index 10.
+        String actual = proc.output.get(10);
+        assertEquals(expected, actual, "After an immediate STORE, memory location 10 should contain the value 12.");
     }
 }

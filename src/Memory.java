@@ -23,10 +23,10 @@ public class Memory {
             if((address.word32[i].getValue() == Bit.boolValues.TRUE))
                 accumulator += calculate2Raised(31 - i);
         }
-        int index = (int) (accumulator % 1000);
-        if(index < 0)
-            index += 1000;
-        return index;
+        int indexHolder = (int) (accumulator % 1000);
+        if(indexHolder < 0)
+            indexHolder += 1000;
+        return indexHolder;
     }
 
     /**
