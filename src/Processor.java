@@ -1,53 +1,54 @@
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
 public class Processor {
     private Memory mem;
+    public List<String> output = new LinkedList<>();
+    private Word32[] registers;
+    private Word16 instructions;
     private Word32 op1;
     private Word32 op2;
-    private int destination;
-    private int source;
-    private int immediate;
-    private int opCode;
     private Word32 result;
-    private boolean changeInProgramCounter;
-    private Stack<Integer> stack;
-    private Word32[] registers;
+    private Bit less;
+    private Bit equal;
     private Word32 buffer;
-    private Word16 instruction;
-    private int programCounter;
-    private boolean halt;
-    private Bit lessHolder;
-    private Bit equalHolder;
-    public List<String> output = new LinkedList<>();
+    private int source;
+    private int destination;
+    private int immediate;
+    private int PC;
     private int flagger;
-    private boolean container;
+    private int opCode;
+    private boolean halt;
+    private boolean status;
+    private boolean changePC;
+    private Stack<Integer> callReturn;
+
+
 
     public Processor(Memory m) {
         mem = m;
-        programCounter = 0;
-        immediate = 0;
-        lessHolder = new Bit(false);
-        equalHolder = new Bit(false);
-        halt = false;
-        stack = new Stack<>();
-        changeInProgramCounter = false;
         registers = new Word32[32];
         for(int i = 0; i < 32; i++) {
             registers[i] = new Word32();
         }
+        instructions = new Word16();
         op1 = new Word32();
         op2 = new Word32();
-        destination = 0;
-        source = 0;
-        opCode = 0;
         result = new Word32();
-        buffer = null;
-        instruction = new Word16();
+        less = new Bit(false);
+        equal = new Bit(false);
+        source = 0;
+        destination = 0;
+        immediate = 0;
+        PC = 0;
         flagger = 0;
-        container = false;
+        opCode = 0;
+        halt = false;
+        status = false;
+        changePC = false;
+        callReturn = new Stack<>();
+        buffer = null;
     }
 
     public void run() {
@@ -58,91 +59,88 @@ public class Processor {
             store();
         }
     }
+
     private void fetch() {
         if(flagger == 0) {
             buffer = new Word32();
-            TestConverter.fromInt(programCounter, mem.address);
+            TestConverter.fromInt(PC, mem.address);
             mem.read();
             mem.value.copy(buffer);
-            buffer.getTopHalf(instruction);
+            buffer.getTopHalf(instructions);
             flagger = 1;
-            container = true;
+            status = true;
         }
         else {
-            buffer.getBottomHalf(instruction);
+            buffer.getBottomHalf(instructions);
             flagger = 0;
-            container = false;
+            status = false;
         }
     }
 
     private void decode() {
-        opCode = returnOpcodeProcessor(instruction);
-        if(opCode == 0 || opCode == 10) {
-
-        }
-        else if(opCode == 8 || opCode == 9 || opCode == 12 || opCode == 13 ||
-                opCode == 14 || opCode == 15 || opCode == 16 || opCode == 17) {
-            immediate = immediateValue11(instruction);
+        opCode = returnOpcodeProcessor(instructions);
+        if(opCode == 8 || opCode == 9 || opCode == 12 || opCode == 13 ||opCode == 14
+                || opCode == 15 || opCode == 16 || opCode == 17) {
+            immediate = immediateValue11(instructions);
         }
         else if(opCode == 19) {
-            if(instruction.word16[5].getValue() == Bit.boolValues.FALSE) {
-                source = convertMiddle(instruction);
-                destination = convertLast(instruction);
+            if(instructions.word16[5].getValue() == Bit.boolValues.FALSE) {
+                source = convertMiddle(instructions);
+                destination = convertLast(instructions);
                 registers[source].copy(op1);
                 registers[destination].copy(op2);
             }
             else {
-                Word32 temporary = new Word32();
-                immediate = immediateValue5(instruction);
-                destination = convertLast(instruction);
-                TestConverter.fromInt(immediate, temporary);
-                temporary.copy(op1);
+                Word32 temp = new Word32();
+                immediate = immediateValue5(instructions);
+                destination = convertLast(instructions);
+                TestConverter.fromInt(immediate, temp);
+                temp.copy(op1);
                 registers[destination].copy(op2);
             }
         }
         else {
-            if(instruction.word16[5].getValue() == Bit.boolValues.FALSE) {
-                source = convertMiddle(instruction);
-                destination = convertLast(instruction);
+            if(instructions.word16[5].getValue() == Bit.boolValues.FALSE) {
+                source = convertMiddle(instructions);
+                destination = convertLast(instructions);
                 registers[destination].copy(op1);
                 registers[source].copy(op2);
             }
-            else if (instruction.word16[5].getValue() == Bit.boolValues.TRUE) {
-                Word32 placement = new Word32();
-                immediate = immediateValue5(instruction);
-                destination = convertLast(instruction);
+            else if(instructions.word16[5].getValue() == Bit.boolValues.TRUE) {
+                Word32 temp = new Word32();
+                immediate = immediateValue5(instructions);
+                destination = convertLast(instructions);
+                TestConverter.fromInt(immediate, temp);
                 registers[destination].copy(op1);
-                TestConverter.fromInt(immediate, placement);
-                placement.copy(op2);
+                temp.copy(op2);
             }
         }
     }
 
     private void execute() {
-        if (opCode == 0) {
+        if(opCode == 0) {
             halt = true;
         }
-        else if (opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 || opCode == 5
-                || opCode == 6 || opCode == 7) {
+        else if(opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 ||
+            opCode == 5 || opCode == 6 || opCode == 7) {
             ALU alu = new ALU();
             op1.copy(alu.op1);
             op2.copy(alu.op2);
-            instruction.copy(alu.instruction);
+            instructions.copy(alu.instruction);
             alu.doInstruction();
             alu.result.copy(result);
-
         }
-        else if (opCode == 11) {
+        else if(opCode == 11) {
             ALU alu = new ALU();
             op1.copy(alu.op1);
             op2.copy(alu.op2);
-            instruction.copy(alu.instruction);
+            instructions.copy(alu.instruction);
             alu.doInstruction();
-            lessHolder.assign(alu.less.getValue());
-            equalHolder.assign(alu.equal.getValue());
+            less.assign(alu.less.getValue());
+            equal.assign(alu.equal.getValue());
         }
-        else if (opCode == 8) {
-            switch (immediate) {
+        else if(opCode == 8) {
+            switch(immediate) {
                 case 0 -> {
                     printReg();
                 }
@@ -151,32 +149,26 @@ public class Processor {
                 }
             }
         }
-        else if (opCode == 9) {
-            changeInProgramCounter = true;
+        else if(opCode == 9 || opCode == 10 || opCode == 12 || opCode == 13 || opCode == 14
+                || opCode == 15 || opCode == 16 || opCode == 17) {
+            changePC = true;
         }
-        else if (opCode == 10) {
-            changeInProgramCounter = true;
-        }
-        else if (opCode == 12 || opCode == 13 || opCode == 14 || opCode == 15
-                || opCode == 16 || opCode == 17) {
-            changeInProgramCounter = true;
-        }
-        else if (opCode == 18) {
-            if (instruction.word16[5].getValue() == Bit.boolValues.FALSE) {
+        else if(opCode == 18) {
+            if(instructions.word16[5].getValue() == Bit.boolValues.FALSE) {
                 op2.copy(mem.address);
             }
-            else if (instruction.word16[5].getValue() == Bit.boolValues.TRUE) {
+            else if(instructions.word16[5].getValue() == Bit.boolValues.TRUE) {
                 Adder.add(op2, op1, mem.address);
             }
             mem.read();
             mem.value.copy(result);
         }
-        else if (opCode == 19) {
+        else if(opCode == 19) {
             op2.copy(mem.address);
             op1.copy(mem.value);
             mem.write();
         }
-        else if (opCode == 20) {
+        else if(opCode == 20) {
             op2.copy(result);
         }
     }
@@ -206,72 +198,70 @@ public class Processor {
     }
 
     private void store() {
-        if(opCode == 8) {
-        }
-        if(opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 || opCode == 5
-                || opCode == 6 || opCode == 7 || opCode == 18 ||
-                opCode == 20) {
+        if(opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 || opCode == 5 || opCode == 6 ||
+                opCode == 7 || opCode == 18 || opCode == 20) {
             result.copy(registers[destination]);
         }
-        if(changeInProgramCounter) {
-            changeInProgramCounter = false;
+        if(changePC) {
+            changePC = false;
             switch(opCode) {
                 case 9 -> {
-                    stack.push(programCounter + 1);
-                    programCounter += immediate;
+                    callReturn.push(PC + 1);
+                    PC += immediate;
                 }
                 case 10 -> {
-                    programCounter = stack.pop();
+                    PC = callReturn.pop();
                     flagger = 0;
-                    container = true;
+                    status = true;
                 }
                 case 12 -> {
-                    if (lessHolder.getValue() == Bit.boolValues.TRUE || equalHolder.getValue() == Bit.boolValues.TRUE) {
-                        programCounter += immediate;
+                    if(less.getValue() == Bit.boolValues.TRUE || equal.getValue() == Bit.boolValues.TRUE) {
+                        PC += immediate;
                     }
                     else
-                        programCounter++;
+                        PC++;
                 }
                 case 13 -> {
-                    if (lessHolder.getValue() == Bit.boolValues.TRUE) {
-                        programCounter += immediate;
+                    if(less.getValue() == Bit.boolValues.TRUE) {
+                        PC += immediate;
                     }
                     else
-                        programCounter++;
+                        PC++;
                 }
-                case 14  -> {
-                    if(lessHolder.getValue() == Bit.boolValues.FALSE) {
-                        programCounter += immediate;
+                case 14 -> {
+                    if(less.getValue() == Bit.boolValues.FALSE) {
+                        PC += immediate;
                     }
                     else
-                        programCounter++;
+                        PC++;
                 }
                 case 15 -> {
-                    if (lessHolder.getValue() == Bit.boolValues.FALSE && equalHolder.getValue() == Bit.boolValues.FALSE) {
-                        programCounter += immediate;
+                    if(less.getValue() == Bit.boolValues.FALSE && equal.getValue() == Bit.boolValues.FALSE) {
+                        PC += immediate;
                     }
                     else
-                        programCounter++;
+                        PC++;
                 }
                 case 16 -> {
-                    if (equalHolder.getValue() == Bit.boolValues.TRUE) {
-                        programCounter += immediate;
+                    if(equal.getValue() == Bit.boolValues.TRUE) {
+                        PC += immediate;
                     }
                     else
-                        programCounter++;
+                        PC++;
                 }
                 case 17 -> {
-                    if(equalHolder.getValue() == Bit.boolValues.FALSE) {
-                            programCounter += immediate;
+                    if(equal.getValue() == Bit.boolValues.FALSE) {
+                        PC += immediate;
                     }
                     else
-                        programCounter++;
+                        PC++;
                 }
             }
         }
         else {
-            if(!container)
-                programCounter++;
+            if(!status) {
+                PC++;
+            }
         }
     }
 
