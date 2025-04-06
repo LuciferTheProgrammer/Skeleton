@@ -3,30 +3,78 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+// The Processor class to create a processor which would run and process sets of instructions at
+// a time divided into 4 categories which are fetch, decode, execute, and store. Depending on the
+// task, the output would either display contents of memory or registers.
 public class Processor {
+
+    // The memory instance.
     private Memory mem;
+
+    // The output to holder either contents held in memory or registers.
     public List<String> output = new LinkedList<>();
+
+    // The 32 registers to hold contents.
     private Word32[] registers;
+
+    // The 16 bit word instruction set.
     private Word16 instructions;
+
+    // The 32 bit word operator 1.
     private Word32 op1;
+
+    // The 32 bit word operator 2.
     private Word32 op2;
+
+    // The 32 bit word result.
     private Word32 result;
+
+    // The bit less flag.
     private Bit less;
+
+    // The bit equal flag.
     private Bit equal;
+
+    // The 32 bit word instruction container.
     private Word32 buffer;
+
+    // The source index.
     private int source;
+
+    // The destination index.
     private int destination;
+
+    // The immediate offset value.
     private int immediate;
+
+    // The program counter.
     private int PC;
+
+    // The tracker of the top half and bottom half of the 32 bit word instruction container.
     private int flagger;
+
+    // The computed operation code.
     private int opCode;
+
+    // The flag to stop.
     private boolean halt;
+
+    // The flag to determine whether to increment the program counter or not.
     private boolean status;
+
+    // The flag for Call/Return/Branches to indicate a change in the program counter.
     private boolean changePC;
+
+    // The stack to be used for Call/Return.
     private Stack<Integer> callReturn;
 
 
-
+    /**
+     * The constructor which takes in a Memory object and assigns it to its Memory instance field.
+     * This method also initializes all of its other member fields with default values.
+     *
+     * @param m The memory.
+     */
     public Processor(Memory m) {
         mem = m;
         registers = new Word32[32];
@@ -52,6 +100,11 @@ public class Processor {
         buffer = null;
     }
 
+    /**
+     * The method runs and processes sets of instructions in a loop, which is composed of
+     * fetch, decode, execute, and store. The process ends once halt is seen and processed.
+     *
+     */
     public void run() {
         while(!halt) {
             fetch();
@@ -61,6 +114,10 @@ public class Processor {
         }
     }
 
+    /**
+     * This method
+     *
+     */
     private void fetch() {
         if(flagger == 0) {
             buffer = new Word32();
