@@ -115,7 +115,12 @@ public class Processor {
     }
 
     /**
-     * This method
+     * This method fetches, using read(), a 32 bit word instruction from memory which uses the
+     * program counter as the index on every other iteration. This is to ensure that the divided 32
+     * bit word instruction is processed in full, by first processing the first top half
+     * which is a 16 bit word instruction in the first iteration and then processes the second bottom
+     * half which is a 16 bit word instruction in the second iteration. Once the full 32 bit word
+     * instruction has been processed we iterate and repeat the process.
      *
      */
     private void fetch() {
@@ -135,6 +140,15 @@ public class Processor {
         }
     }
 
+    /**
+     * This method computes the opcode based on the first 5 bits from the 16 bit word instruction
+     * taken. Then based on that opcode value, this method branches to the corresponding operation and executes
+     * the associated block of code. This is either to compute the middle 5 bits and last 5 bits and store them into
+     * op1 and op2, where the 6th bit dictates if the instruction set is either in immediate or 2R
+     * format. For some instructions such as Call/Return and Branch Conditions the 11 bits are computed
+     * as an immediate value with no 2R format and no storing of the values to op1 and op2.
+     *
+     */
     private void decode() {
         opCode = returnOpcodeProcessor(instructions);
         if(opCode == 8 || opCode == 9 || opCode == 12 || opCode == 13 ||opCode == 14
@@ -175,6 +189,17 @@ public class Processor {
         }
     }
 
+    /**
+     * This method performs the operation based on the given opcode derived from the instruction set.
+     * For a halt instruction, it sets the halt flag to true to end the program. For arithmetic instructions
+     * the method creates an ALU instance and runs the operation which takes in the parameters stored
+     * on op1 and op2 and returns the result. While the compare instruction sets up the status flags
+     * for a Branch condition that comes after. For a Syscall instruction it simply prints the contents
+     * of the registers or memory. For a Call, Return, and Branch conditions the flag to indicate a change
+     * in program counter is needed is set. For load, it simply loads data from the memory address into the
+     * resulting container. While store simply writes data into the specified memory address. Finally, copy
+     * copies the source value into the resulting container.
+     */
     private void execute() {
         if(opCode == 0) {
             halt = true;
@@ -231,6 +256,10 @@ public class Processor {
         }
     }
 
+    /**
+     * This method prints the contents of the registers.
+     *
+     */
     private void printReg() {
         for (int i = 0; i < 32; i++) {
             var line = "r"+ i + ":" + registers[i].toString(); // TODO: add the register value here...
@@ -239,6 +268,10 @@ public class Processor {
         }
     }
 
+    /**
+     * This method prints the contents of the memory.
+     *
+     */
     private void printMem() {
         for (int i = 0; i < 1000; i++) {
             Word32 addr = new Word32();
@@ -255,6 +288,18 @@ public class Processor {
         }
     }
 
+    /**
+     * This method stores the final resulting value into the destination register from the arithmetic,
+     * load, and copy instructions. While detecting if there is a change program counter, which is
+     * indicated by using a flag. This change is reflected for Call, Return, and Branch instructions.
+     * Where a Call pushes the program counter + 1 into to stack and a Return pops the top of the Stack and
+     * returns the value to be the new program counter. Ultimately Call and Branch
+     * Conditions update the Program Counter by assigning it the value of itself plus the immediate
+     * value. If none of the Branch conditions are met, the program counter is incremented.
+     * Finally, if we are still processing the top half of the 32 bit word instruction set, program
+     * counter isn't incremented, otherwise it is (indicated by status flag).
+     *
+     */
     private void store() {
         if(opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 || opCode == 5 || opCode == 6 ||
                 opCode == 7 || opCode == 18 || opCode == 20) {
