@@ -4,14 +4,14 @@ import java.util.List;
 import java.util.Stack;
 
 // The Processor class to create a processor which would run and process sets of instructions at
-// a time divided into 4 categories which are fetch, decode, execute, and store. Depending on the
+// a time, divided into 4 categories which are fetch, decode, execute, and store. Depending on the
 // task, the output would either display contents of memory or registers.
 public class Processor {
 
     // The memory instance.
     private Memory mem;
 
-    // The output to holder either contents held in memory or registers.
+    // The output to hold either contents held in memory or registers.
     public List<String> output = new LinkedList<>();
 
     // The 32 registers to hold contents.
@@ -120,7 +120,7 @@ public class Processor {
      * bit word instruction is processed in full, by first processing the first top half
      * which is a 16 bit word instruction in the first iteration and then processes the second bottom
      * half which is a 16 bit word instruction in the second iteration. Once the full 32 bit word
-     * instruction has been processed we iterate and repeat the process.
+     * instruction has been processed we read() again in the next iteration and repeat the process.
      *
      */
     private void fetch() {
@@ -144,7 +144,7 @@ public class Processor {
      * This method computes the opcode based on the first 5 bits from the 16 bit word instruction
      * taken. Then based on that opcode value, this method branches to the corresponding operation and executes
      * the associated block of code. This is either to compute the middle 5 bits and last 5 bits and store them into
-     * op1 and op2, where the 6th bit dictates if the instruction set is either in immediate or 2R
+     * op1 and op2, where bit 5 dictates if the instruction set is either an immediate or 2R
      * format. For some instructions such as Call/Return and Branch Conditions the 11 bits are computed
      * as an immediate value with no 2R format and no storing of the values to op1 and op2.
      *
@@ -193,7 +193,7 @@ public class Processor {
      * This method performs the operation based on the given opcode derived from the instruction set.
      * For a halt instruction, it sets the halt flag to true to end the program. For arithmetic instructions
      * the method creates an ALU instance and runs the operation which takes in the parameters stored
-     * on op1 and op2 and returns the result. While the compare instruction sets up the status flags
+     * on op1, op2, and instruction and returns the result. While the compare instruction sets up the status flags
      * for a Branch condition that comes after. For a Syscall instruction it simply prints the contents
      * of the registers or memory. For a Call, Return, and Branch conditions the flag to indicate a change
      * in program counter is needed is set. For load, it simply loads data from the memory address into the
@@ -294,10 +294,11 @@ public class Processor {
      * indicated by using a flag. This change is reflected for Call, Return, and Branch instructions.
      * Where a Call pushes the program counter + 1 into to stack and a Return pops the top of the Stack and
      * returns the value to be the new program counter. Ultimately Call and Branch
-     * Conditions update the Program Counter by assigning it the value of itself plus the immediate
+     * Conditions update the program counter by assigning it the value of itself plus the immediate
      * value. If none of the Branch conditions are met, the program counter is incremented.
      * Finally, if we are still processing the top half of the 32 bit word instruction set, program
-     * counter isn't incremented, otherwise it is (indicated by status flag).
+     * counter isn't incremented, otherwise it is (indicated by status flag). This sets the program
+     * to fetch the next 32 bit word instruction set from memory to be processed.
      *
      */
     private void store() {
@@ -368,6 +369,13 @@ public class Processor {
         }
     }
 
+    /**
+     * This method takes in a 16 bit word instruction set and computes the opcode using the first
+     * 5 bits, to determine the type of instruction. Then returns the computed opcode.
+     *
+     * @param sample The 16 bit word instruction set.
+     * @return The opcode.
+     */
     public int returnOpcodeProcessor(Word16 sample) {
         int startingOpCode = 0;
         for (int i = 0; i < 5; i++) {
@@ -378,6 +386,13 @@ public class Processor {
         return startingOpCode;
     }
 
+    /**
+     * This method takes in a 16 bit word instruction set and computes the middle 5 bits, bits 6 - 10,
+     * and returns the computed value for a register.
+     *
+     * @param sample The 16 bit word instruction set.
+     * @return The computed value.
+     */
     public int convertMiddle(Word16 sample) {
         int total = 0;
         for(int i = 6; i < 11; i++) {
@@ -388,6 +403,13 @@ public class Processor {
         return total;
     }
 
+    /**
+     * This method takes in a 16 bit word instruction set and computes the last 5 bits, bits 11 - 15,
+     * and returns the computed value for a register.
+     *
+     * @param sample The 16 bit word instruction set.
+     * @return The computed value.
+     */
     public int convertLast(Word16 sample) {
         int total = 0;
         for(int i = 11; i < 16; i++) {
@@ -397,6 +419,14 @@ public class Processor {
         }
         return total;
     }
+
+    /**
+     * This method takes in a 16 bit word instruction set and computes the middle 5 bits, bits 6 - 10,
+     * but sign extends the immediate value. Finally, returns the computed value.
+     *
+     * @param sample The 16 bit word instruction set.
+     * @return The computed value.
+     */
     public int immediateValue5(Word16 sample) {
         int total = 0;
         for(int i = 6; i < 11; i++) {
@@ -409,6 +439,14 @@ public class Processor {
         }
         return total;
     }
+
+    /**
+     * This method takes in a 16 bit word instruction set and computes the 11 bits, bits 5 - 15,
+     * but sign extends the immediate value. Finally, returns the computed value.
+     *
+     * @param sample The 16 bit word instruction set.
+     * @return The computed value.
+     */
     public int immediateValue11(Word16 sample) {
         int total = 0;
         for(int i = 5; i < 16; i++) {
