@@ -68,6 +68,8 @@ public class Processor {
     // The stack to be used for Call/Return.
     private Stack<Integer> callReturn;
 
+    private int currentClockCycle = 0;
+
 
     /**
      * The constructor which takes in a Memory object and assigns it to its Memory instance field.
@@ -112,6 +114,8 @@ public class Processor {
             execute();
             store();
         }
+        printClockCycle();
+        System.out.println(TestConverter.toInt(registers[3]));
     }
 
     /**
@@ -128,6 +132,7 @@ public class Processor {
             buffer = new Word32();
             TestConverter.fromInt(PC, mem.address);
             mem.read();
+            currentClockCycle += 300;
             mem.value.copy(buffer);
             buffer.getTopHalf(instructions);
             flagger = 1;
@@ -212,6 +217,10 @@ public class Processor {
             instructions.copy(alu.instruction);
             alu.doInstruction();
             alu.result.copy(result);
+            if(opCode == 3) {
+                currentClockCycle += 10;
+            }
+            currentClockCycle += 2;
         }
         else if(opCode == 11) {
             ALU alu = new ALU();
@@ -221,6 +230,7 @@ public class Processor {
             alu.doInstruction();
             less.assign(alu.less.getValue());
             equal.assign(alu.equal.getValue());
+            currentClockCycle += 2;
         }
         else if(opCode == 8) {
             switch(immediate) {
@@ -245,11 +255,13 @@ public class Processor {
             }
             mem.read();
             mem.value.copy(result);
+            currentClockCycle += 300;
         }
         else if(opCode == 19) {
             op2.copy(mem.address);
             op1.copy(mem.value);
             mem.write();
+            currentClockCycle += 300;
         }
         else if(opCode == 20) {
             op2.copy(result);
@@ -280,6 +292,7 @@ public class Processor {
             TestConverter.fromInt(i, addr);
             addr.copy(mem.address);
             mem.read();
+            currentClockCycle += 300;
             mem.value.copy(value);
             //var line = i + ":" + value + "(" + TestConverter.toInt(value) + ")";
             var line = i + ":" + value.toString();
@@ -458,5 +471,67 @@ public class Processor {
             total -= 2048;
         }
         return total;
+    }
+
+    public void printClockCycle() {
+        System.out.println("Current Clock Cycle: " + currentClockCycle);
+    }
+    public static void main(String[] args) {
+        String[] sumArrayInt = {
+                "copy 10 r0",
+                "multiply 10 r0",
+                "multiply 4 r0", // Get address 400 to r0
+
+                "copy 15 r1", // Fill in value 1
+
+                "copy 10 r2",
+                "multiply 2 r2", // Length 20
+                "copy 4 r5",
+
+                "store r1 r0",
+                "add r5 r0",
+                "subtract 1 r2",
+                "compare 0 r2",
+                "bne -2",
+
+                "copy 10 r0",
+                "multiply 10 r0",
+                "multiply 4 r0", // Get address 400 to r0
+
+                "copy 10 r2",
+                "multiply 2 r2", // Length 20
+
+                "copy 0 r3", // Accumulator
+
+                "load r0 r4", //Sum the array until length is decremented from 20 to 0.
+                "add r4 r3",
+                "add r5 r0",
+                "subtract 1 r2",
+                "compare 0 r2",
+                "bne -2",
+
+                "halt"
+        };
+        var p = runMyPro(sumArrayInt);
+    }
+    public static Processor runMyPro(String[] placement) {
+        var assembled = Assembler.assemble(placement);
+        var merged = Assembler.finalOutput(assembled);
+        var memory = new Memory();
+        memory.load(merged);
+        var processor = new Processor(memory);
+        processor.run();
+        for (int i = 400; i < 480; i += 4) {
+            Word32 value = new Word32();
+            Word32 result = new Word32();
+            TestConverter.fromInt(i, result);
+            result.copy(memory.address);
+            memory.read();
+            memory.value.copy(value);
+            int holder = TestConverter.toInt(value);
+            String formatted = String.format("Current value at array index %d: is %d", i, holder);
+            System.out.println(formatted);
+        }
+        return processor;
     }
 }
