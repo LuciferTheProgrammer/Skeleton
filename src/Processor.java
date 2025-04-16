@@ -70,6 +70,10 @@ public class Processor {
 
     private int currentClockCycle = 0;
 
+    private int baseAddressHolder = 0;
+
+    static int counter = 0;
+
 
     /**
      * The constructor which takes in a Memory object and assigns it to its Memory instance field.
@@ -115,7 +119,24 @@ public class Processor {
             store();
         }
         printClockCycle();
-        System.out.println(TestConverter.toInt(registers[3]));
+        switch(counter) {
+            case 0 -> {
+                baseAddressHolder = TestConverter.toInt(registers[6]);
+                System.out.println("baseAddressHolder: " + baseAddressHolder);
+                System.out.println("Total Value: " + TestConverter.toInt(registers[3]));
+            }
+            case 1 -> {
+                baseAddressHolder = TestConverter.toInt(registers[7]);
+                System.out.println("baseAddressHolder: " + baseAddressHolder);
+                System.out.println("Total Value: " + TestConverter.toInt(registers[3]));;
+            }
+            case 2 -> {
+                baseAddressHolder = TestConverter.toInt(registers[6]);
+                System.out.println("baseAddressHolder: " + baseAddressHolder);
+                System.out.println("Total Value: " + TestConverter.toInt(registers[3]));
+            }
+        }
+        printMyArrayMemory();
     }
 
     /**
@@ -220,7 +241,8 @@ public class Processor {
             if(opCode == 3) {
                 currentClockCycle += 10;
             }
-            currentClockCycle += 2;
+            else
+                currentClockCycle += 2;
         }
         else if(opCode == 11) {
             ALU alu = new ALU();
@@ -476,62 +498,17 @@ public class Processor {
     public void printClockCycle() {
         System.out.println("Current Clock Cycle: " + currentClockCycle);
     }
-    public static void main(String[] args) {
-        String[] sumArrayInt = {
-                "copy 10 r0",
-                "multiply 10 r0",
-                "multiply 4 r0", // Get address 400 to r0
-
-                "copy 15 r1", // Fill in value 1
-
-                "copy 10 r2",
-                "multiply 2 r2", // Length 20
-                "copy 4 r5",
-
-                "store r1 r0",
-                "add r5 r0",
-                "subtract 1 r2",
-                "compare 0 r2",
-                "bne -2",
-
-                "copy 10 r0",
-                "multiply 10 r0",
-                "multiply 4 r0", // Get address 400 to r0
-
-                "copy 10 r2",
-                "multiply 2 r2", // Length 20
-
-                "copy 0 r3", // Accumulator
-
-                "load r0 r4", //Sum the array until length is decremented from 20 to 0.
-                "add r4 r3",
-                "add r5 r0",
-                "subtract 1 r2",
-                "compare 0 r2",
-                "bne -2",
-
-                "halt"
-        };
-        var p = runMyPro(sumArrayInt);
-    }
-    public static Processor runMyPro(String[] placement) {
-        var assembled = Assembler.assemble(placement);
-        var merged = Assembler.finalOutput(assembled);
-        var memory = new Memory();
-        memory.load(merged);
-        var processor = new Processor(memory);
-        processor.run();
-        for (int i = 400; i < 480; i += 4) {
+    public void printMyArrayMemory() {
+        for (int i = 400; i < 600; i+= 4) {
+            Word32 addr = new Word32();
             Word32 value = new Word32();
-            Word32 result = new Word32();
-            TestConverter.fromInt(i, result);
-            result.copy(memory.address);
-            memory.read();
-            memory.value.copy(value);
+            TestConverter.fromInt(i, addr);
+            addr.copy(mem.address);
+            mem.read();
+            mem.value.copy(value);
             int holder = TestConverter.toInt(value);
-            String formatted = String.format("Current value at array index %d: is %d", i, holder);
+            String formatted = String.format("Current value at array index %d: %d", i, holder);
             System.out.println(formatted);
         }
-        return processor;
     }
 }
