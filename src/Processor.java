@@ -74,6 +74,8 @@ public class Processor {
 
     static int counter = 0;
 
+    private InstructionCache cache;
+
 
     /**
      * The constructor which takes in a Memory object and assigns it to its Memory instance field.
@@ -103,6 +105,7 @@ public class Processor {
         status = false;
         changePC = false;
         callReturn = new Stack<>();
+        cache = new InstructionCache(m);
         buffer = null;
     }
 
@@ -152,9 +155,14 @@ public class Processor {
         if(flagger == 0) {
             buffer = new Word32();
             TestConverter.fromInt(PC, mem.address);
-            mem.read();
-            currentClockCycle += 300;
-            mem.value.copy(buffer);
+
+            //mem.read();
+            //currentClockCycle += 300;
+            //mem.value.copy(buffer);
+
+            buffer = cache.read(mem.address);
+            currentClockCycle += cache.InstructionCacheClockCycle;
+            cache.InstructionCacheClockCycle = 0;
             buffer.getTopHalf(instructions);
             flagger = 1;
             status = true;
@@ -314,7 +322,6 @@ public class Processor {
             TestConverter.fromInt(i, addr);
             addr.copy(mem.address);
             mem.read();
-            currentClockCycle += 300;
             mem.value.copy(value);
             //var line = i + ":" + value + "(" + TestConverter.toInt(value) + ")";
             var line = i + ":" + value.toString();
