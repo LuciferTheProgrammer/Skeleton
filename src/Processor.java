@@ -506,7 +506,7 @@ public class Processor {
         System.out.println("Current Clock Cycle: " + currentClockCycle);
     }
     public void printMyArrayMemory() {
-        for (int i = 400; i < 600; i+= 4) {
+        for (int i = 400; i < 480; i++) {
             Word32 addr = new Word32();
             Word32 value = new Word32();
             TestConverter.fromInt(i, addr);
