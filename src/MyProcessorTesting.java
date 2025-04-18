@@ -31,6 +31,7 @@ public class MyProcessorTesting {
                 "bne -2",
                 "halt"
         };
+
         System.out.println("Case 1: Array of size 20 and sum: ");
         var processor1 = runMyPro(sumArrayInt);
         Processor.counter++;
@@ -56,7 +57,7 @@ public class MyProcessorTesting {
                 "subtract 1 r2",
                 "compare 0 r2",
                 "bne -4",
-                "subtract r1 r0",
+                "subtract r1 r0", // Address 439 - 2 = 437 + 1 = 438 -> 0
                 "add 1 r0",
                 "copy 0 r6",
                 "store r6 r0",
@@ -71,7 +72,6 @@ public class MyProcessorTesting {
                 "compare 0 r0", // line 3
                 "bne -3",
                 "halt"
-
         };
 
         System.out.println("Case 2: LinkedList of size 20 and sum: ");
@@ -101,8 +101,8 @@ public class MyProcessorTesting {
                 "add 15 r6",
                 "add 4 r6",
                 "copy 0 r0", // Dummy
-                "copy 0 r0", // Get address space 419 to r0
-                "add r6 r0",
+                "copy 0 r0",
+                "add r6 r0", // Get address space 419 to r0
                 "copy 10 r2",
                 "multiply 2 r2", // Length 20 {length}
                 "copy 0 r3", // Accumulator
@@ -114,9 +114,9 @@ public class MyProcessorTesting {
                 "bne -2",
                 "halt"
         };
+
         System.out.println("Case 3: Array of size 20 and sum backwards: ");
         var processor3 = runMyPro(sumArrayIntBackwards);
-
     }
 
     public static Processor runMyPro(String[] placement) {
@@ -127,6 +127,5 @@ public class MyProcessorTesting {
         var processor = new Processor(memory);
         processor.run();
         return processor;
-
     }
 }
