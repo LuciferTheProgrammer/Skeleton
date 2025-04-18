@@ -31,7 +31,6 @@ public class MyProcessorTesting {
                 "subtract 1 r2",
                 "compare 0 r2",
                 "bne -2",
-
                 "halt"
         };
         System.out.println("Case 1: Array of size 20 and sum: ");
@@ -73,7 +72,7 @@ public class MyProcessorTesting {
                 "copy 0 r2", // Dummy
                 "compare 0 r0", // line 3
                 "bne -3",
-                "halt",
+                "halt"
 
         };
 
