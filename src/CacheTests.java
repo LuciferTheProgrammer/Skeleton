@@ -1,4 +1,4 @@
-public class MyProcessorTesting {
+public class CacheTests {
     public static void main(String[] args) {
 
         // Case 1:
