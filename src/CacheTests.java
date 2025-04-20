@@ -1,7 +1,12 @@
-public class CacheTests {
-    public static void main(String[] args) {
+import org.junit.jupiter.api.Test;
 
-        // Case 1:
+import static org.junit.jupiter.api.Assertions.*;
+
+public class CacheTests {
+
+    // Case 1:
+    @Test
+    public void SumIntegersTest() {
         String[] sumArrayInt = {
                 "copy 10 r6",
                 "multiply 10 r6",
@@ -31,13 +36,20 @@ public class CacheTests {
                 "bne -2",
                 "halt"
         };
-
         System.out.println("Case 1: Array of size 20 and sum: ");
         var processor1 = runMyPro(sumArrayInt);
         Processor.counter++;
         System.out.println();
+        Word32[] r = processor1.getRegisters();
+        assertEquals(300, TestConverter.toInt(r[3]));
+        assertEquals("405:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor1.output.get(5));
+        assertEquals("406:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor1.output.get(6));
+        assertEquals("415:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor1.output.get(15));
+    }
 
-        // Case 2:
+    // Case 2:
+    @Test
+    public void LinkedListTest() {
         String[] LinkedList = {
                 "copy 10 r0",
                 "multiply 10 r0",
@@ -73,14 +85,20 @@ public class CacheTests {
                 "bne -3",
                 "halt"
         };
-
         System.out.println("Case 2: LinkedList of size 20 and sum: ");
         var processor2 = runMyPro(LinkedList);
         Processor.counter++;
         System.out.println();
-
-
-        // Case 3:
+        Word32[] r = processor2.getRegisters();
+        assertEquals(300, TestConverter.toInt(r[3]));
+        assertEquals("400:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor2.output.get(0));
+        assertEquals("401:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,f,t,f,f,t,f,", processor2.output.get(1));
+        assertEquals("402:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor2.output.get(2));
+        assertEquals("403:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,f,t,f,t,f,f,", processor2.output.get(3));
+    }
+    // Case 3:
+    @Test
+    public void SumIntegersBackwardsTest() {
         String[] sumArrayIntBackwards = {
                 "copy 10 r0",
                 "multiply 10 r0",
@@ -117,9 +135,14 @@ public class CacheTests {
 
         System.out.println("Case 3: Array of size 20 and sum backwards: ");
         var processor3 = runMyPro(sumArrayIntBackwards);
+        Word32[] r = processor3.getRegisters();
+        assertEquals(300, TestConverter.toInt(r[3]));
+        assertEquals("409:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor3.output.get(9));
+        assertEquals("413:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor3.output.get(13));
+        assertEquals("419:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor3.output.get(19));
     }
 
-    public static Processor runMyPro(String[] placement) {
+    private static Processor runMyPro(String[] placement) {
         var assembled = Assembler.assemble(placement);
         var merged = Assembler.finalOutput(assembled);
         var memory = new Memory();

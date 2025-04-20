@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -74,7 +73,7 @@ public class Processor {
 
     static int counter = 0;
 
-    private InstructionCache cache;
+    private InstructionCache instructionCache;
 
     private L2Cache l2Cache;
 
@@ -108,7 +107,7 @@ public class Processor {
         changePC = false;
         callReturn = new Stack<>();
         l2Cache = new L2Cache(m);
-        cache = new InstructionCache(m, l2Cache);
+        instructionCache = new InstructionCache(l2Cache);
         buffer = null;
     }
 
@@ -157,15 +156,9 @@ public class Processor {
     private void fetch() {
         if(flagger == 0) {
             buffer = new Word32();
-            TestConverter.fromInt(PC, mem.address);
-
-            //mem.read();
-            //currentClockCycle += 300;
-            //mem.value.copy(buffer);
-
-            buffer = cache.read(mem.address);
-            currentClockCycle += cache.InstructionCacheClockCycle;
-            cache.InstructionCacheClockCycle = 0;
+            buffer = instructionCache.read(PC);
+            currentClockCycle += instructionCache.InstructionCacheClockCycle;
+            instructionCache.InstructionCacheClockCycle = 0;
             buffer.getTopHalf(instructions);
             flagger = 1;
             status = true;
@@ -280,21 +273,21 @@ public class Processor {
             changePC = true;
         }
         else if(opCode == 18) {
+            Word32 container = new Word32();
             if(instructions.word16[5].getValue() == Bit.boolValues.FALSE) {
-                op2.copy(mem.address);
+                op2.copy(container);
             }
             else if(instructions.word16[5].getValue() == Bit.boolValues.TRUE) {
-                Adder.add(op2, op1, mem.address);
+                Adder.add(op2, op1, container);
             }
-            mem.read();
-            mem.value.copy(result);
-            currentClockCycle += 300;
+            result = l2Cache.read(container);
+            currentClockCycle += l2Cache.L2CacheClockCycle;
+            l2Cache.L2CacheClockCycle = 0;
         }
         else if(opCode == 19) {
-            op2.copy(mem.address);
-            op1.copy(mem.value);
-            mem.write();
-            currentClockCycle += 300;
+            l2Cache.write(op2, op1);
+            currentClockCycle += l2Cache.L2CacheClockCycle;
+            l2Cache.L2CacheClockCycle = 0;
         }
         else if(opCode == 20) {
             op2.copy(result);
@@ -516,9 +509,14 @@ public class Processor {
             addr.copy(mem.address);
             mem.read();
             mem.value.copy(value);
+            var line = i + ":" + value.toString();
+            output.add(line);
             int holder = TestConverter.toInt(value);
             String formatted = String.format("Current value at array index %d: %d", i, holder);
             System.out.println(formatted);
         }
+    }
+    public Word32[] getRegisters(){
+        return registers;
     }
 }

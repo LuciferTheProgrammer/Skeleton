@@ -12,6 +12,8 @@ public class Sum {
     }
 
          */
-            System.out.println(5 << 2);
+            Word32 word = new Word32();
+            TestConverter.fromInt(404, word);
+            System.out.println(word.toString());
     }
 }

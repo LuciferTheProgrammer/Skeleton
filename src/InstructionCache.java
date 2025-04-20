@@ -1,11 +1,9 @@
 public class InstructionCache {
-    public Memory memory;
     public int InstructionCacheClockCycle;
     public L2Cache l2Cache;
     public Word32[] slots;
 
-    public InstructionCache(Memory memory, L2Cache l2Cache) {
-        this.memory = memory;
+    public InstructionCache(L2Cache l2Cache) {
         this.l2Cache = l2Cache;
         slots = new Word32[9] ;
         for(int i = 0; i < slots.length; i++) {
@@ -16,8 +14,7 @@ public class InstructionCache {
 
     }
 
-    public Word32 read(Word32 sample) {
-        int address = TestConverter.toInt(sample);
+    public Word32 read(int address) {
         int baseAddress = address - (address % 8);
         int target = address % 8;
         int firstAddress = TestConverter.toInt(slots[0]);
@@ -31,10 +28,6 @@ public class InstructionCache {
             InstructionCacheClockCycle += l2Cache.L2CacheClockCycle;
             l2Cache.L2CacheClockCycle = 0;
             for(int i = 0; i < 8; i++) {
-                //Word32 addr = new Word32();
-                //TestConverter.fromInt(baseAddress + i, addr);
-                //addr.copy(memory.address);
-                //memory.read();
                 scope[i].copy(slots[1 + i]);
             }
             InstructionCacheClockCycle += 50;
