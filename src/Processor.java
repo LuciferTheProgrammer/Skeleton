@@ -76,6 +76,8 @@ public class Processor {
 
     private InstructionCache cache;
 
+    private L2Cache l2Cache;
+
 
     /**
      * The constructor which takes in a Memory object and assigns it to its Memory instance field.
@@ -105,7 +107,8 @@ public class Processor {
         status = false;
         changePC = false;
         callReturn = new Stack<>();
-        cache = new InstructionCache(m);
+        l2Cache = new L2Cache(m);
+        cache = new InstructionCache(m, l2Cache);
         buffer = null;
     }
 
