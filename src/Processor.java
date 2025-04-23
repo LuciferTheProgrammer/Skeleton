@@ -67,14 +67,13 @@ public class Processor {
     // The stack to be used for Call/Return.
     private Stack<Integer> callReturn;
 
+    // To keep count of total clock cycles.
     private int currentClockCycle = 0;
 
-    private int baseAddressHolder = 0;
-
-    static int counter = 0;
-
+    // The InstructionCache instance.
     private InstructionCache instructionCache;
 
+    // The L2Cache instance.
     private L2Cache l2Cache;
 
 
@@ -124,24 +123,6 @@ public class Processor {
             store();
         }
         printClockCycle();
-        switch(counter) {
-            case 0 -> {
-                baseAddressHolder = TestConverter.toInt(registers[6]);
-                System.out.println("baseAddressHolder: " + baseAddressHolder);
-                System.out.println("Total Value: " + TestConverter.toInt(registers[3]));
-            }
-            case 1 -> {
-                baseAddressHolder = TestConverter.toInt(registers[7]);
-                System.out.println("baseAddressHolder: " + baseAddressHolder);
-                System.out.println("Total Value: " + TestConverter.toInt(registers[3]));;
-            }
-            case 2 -> {
-                baseAddressHolder = TestConverter.toInt(registers[6]);
-                System.out.println("baseAddressHolder: " + baseAddressHolder);
-                System.out.println("Total Value: " + TestConverter.toInt(registers[3]));
-            }
-        }
-        printMyArrayMemory();
     }
 
     /**
@@ -235,7 +216,7 @@ public class Processor {
             halt = true;
         }
         else if(opCode == 1 || opCode == 2 || opCode == 3 || opCode == 4 ||
-            opCode == 5 || opCode == 6 || opCode == 7) {
+                opCode == 5 || opCode == 6 || opCode == 7) {
             ALU alu = new ALU();
             op1.copy(alu.op1);
             op2.copy(alu.op2);
@@ -283,6 +264,7 @@ public class Processor {
             result = l2Cache.read(container);
             currentClockCycle += l2Cache.L2CacheClockCycle;
             l2Cache.L2CacheClockCycle = 0;
+
         }
         else if(opCode == 19) {
             l2Cache.write(op2, op1);
@@ -498,9 +480,18 @@ public class Processor {
         return total;
     }
 
+    /**
+     * This method prints the total clock cycle count.
+     *
+     */
     public void printClockCycle() {
         System.out.println("Current Clock Cycle: " + currentClockCycle);
     }
+
+    /**
+     * This method prints the contents of memory from slots 400 to 449. The address space used
+     * by the test programs in CacheTests.
+     */
     public void printMyArrayMemory() {
         for (int i = 400; i < 450; i++) {
             Word32 addr = new Word32();
@@ -516,6 +507,12 @@ public class Processor {
             System.out.println(formatted);
         }
     }
+
+    /**
+     * This method returns the array of registers.
+     *
+     * @return The registers.
+     */
     public Word32[] getRegisters(){
         return registers;
     }

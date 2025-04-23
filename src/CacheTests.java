@@ -38,9 +38,11 @@ public class CacheTests {
         };
         System.out.println("Case 1: Array of size 20 and sum: ");
         var processor1 = runMyPro(sumArrayInt);
-        Processor.counter++;
-        System.out.println();
         Word32[] r = processor1.getRegisters();
+        System.out.println("baseAddressHolder: " + TestConverter.toInt(r[6]));
+        System.out.println("Total Value: " + TestConverter.toInt(r[3]));
+        processor1.printMyArrayMemory();
+        System.out.println();
         assertEquals(300, TestConverter.toInt(r[3]));
         assertEquals("405:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor1.output.get(5));
         assertEquals("406:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor1.output.get(6));
@@ -58,7 +60,7 @@ public class CacheTests {
                 "copy 2 r1", // Node size (1 32 word for data and 1 32 word for reference)
                 "copy 5 r2",
                 "leftshift 2 r2",  // Length 20
-                "copy 15 r3", // Constant value to be stored on data fields.
+                "copy 10 r3", // Constant value to be stored on data fields.
                 "store r3 r0",
                 "copy r0 r4",
                 "add 1 r4",
@@ -69,7 +71,7 @@ public class CacheTests {
                 "subtract 1 r2",
                 "compare 0 r2",
                 "bne -4",
-                "subtract r1 r0", // Address 439 - 2 = 437 + 1 = 438 -> 0
+                "subtract r1 r0", // Address 440-2 = 438 + 1 = 439 -> 0
                 "add 1 r0",
                 "copy 0 r6",
                 "store r6 r0",
@@ -87,13 +89,15 @@ public class CacheTests {
         };
         System.out.println("Case 2: LinkedList of size 20 and sum: ");
         var processor2 = runMyPro(LinkedList);
-        Processor.counter++;
-        System.out.println();
         Word32[] r = processor2.getRegisters();
-        assertEquals(300, TestConverter.toInt(r[3]));
-        assertEquals("400:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor2.output.get(0));
+        System.out.println("baseAddressHolder: " + TestConverter.toInt(r[7]));
+        System.out.println("Total Value: " + TestConverter.toInt(r[3]));
+        processor2.printMyArrayMemory();
+        System.out.println();
+        assertEquals(200, TestConverter.toInt(r[3]));
+        assertEquals("400:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,f,t,f,", processor2.output.get(0));
         assertEquals("401:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,f,t,f,f,t,f,", processor2.output.get(1));
-        assertEquals("402:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor2.output.get(2));
+        assertEquals("402:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,f,t,f,", processor2.output.get(2));
         assertEquals("403:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,f,t,f,t,f,f,", processor2.output.get(3));
     }
     // Case 3:
@@ -103,7 +107,7 @@ public class CacheTests {
                 "copy 10 r0",
                 "multiply 10 r0",
                 "multiply 4 r0", // Get address space 400 to r0
-                "copy 15 r1", // Fill in value 1
+                "copy 6 r1", // Fill in value 1
                 "copy 10 r2",
                 "multiply 2 r2", // Length 20
                 "copy 1 r5",
@@ -132,14 +136,16 @@ public class CacheTests {
                 "bne -2",
                 "halt"
         };
-
         System.out.println("Case 3: Array of size 20 and sum backwards: ");
         var processor3 = runMyPro(sumArrayIntBackwards);
         Word32[] r = processor3.getRegisters();
-        assertEquals(300, TestConverter.toInt(r[3]));
-        assertEquals("409:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor3.output.get(9));
-        assertEquals("413:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor3.output.get(13));
-        assertEquals("419:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor3.output.get(19));
+        System.out.println("baseAddressHolder: " + TestConverter.toInt(r[6]));
+        System.out.println("Total Value: " + TestConverter.toInt(r[3]));
+        processor3.printMyArrayMemory();
+        assertEquals(120, TestConverter.toInt(r[3]));
+        assertEquals("409:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,", processor3.output.get(9));
+        assertEquals("413:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,", processor3.output.get(13));
+        assertEquals("419:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,", processor3.output.get(19));
     }
 
     private static Processor runMyPro(String[] placement) {
