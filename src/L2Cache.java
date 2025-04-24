@@ -3,6 +3,7 @@
 // returning those desired word instructions to Instruction Cache. It also handles
 // reading from and writing data to the main memory when the processor uses load/store.
 public class L2Cache {
+
     // The cache to hold 32 total word instructions, size of 4 by 8.
     private Word32[][] instruction_holder;
 
