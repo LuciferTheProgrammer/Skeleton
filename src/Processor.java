@@ -68,7 +68,7 @@ public class Processor {
     private Stack<Integer> callReturn;
 
     // To keep count of total clock cycles.
-    private int currentClockCycle = 0;
+    public static int currentClockCycle = 0;
 
     // The InstructionCache instance.
     private InstructionCache instructionCache;
@@ -116,6 +116,7 @@ public class Processor {
      *
      */
     public void run() {
+        currentClockCycle = 0;
         while(!halt) {
             fetch();
             decode();
@@ -138,8 +139,6 @@ public class Processor {
         if(flagger == 0) {
             buffer = new Word32();
             buffer = instructionCache.read(PC);
-            currentClockCycle += instructionCache.InstructionCacheClockCycle;
-            instructionCache.InstructionCacheClockCycle = 0;
             buffer.getTopHalf(instructions);
             flagger = 1;
             status = true;
@@ -262,14 +261,9 @@ public class Processor {
                 Adder.add(op2, op1, container);
             }
             result = l2Cache.read(container);
-            currentClockCycle += l2Cache.L2CacheClockCycle;
-            l2Cache.L2CacheClockCycle = 0;
-
         }
         else if(opCode == 19) {
             l2Cache.write(op2, op1);
-            currentClockCycle += l2Cache.L2CacheClockCycle;
-            l2Cache.L2CacheClockCycle = 0;
         }
         else if(opCode == 20) {
             op2.copy(result);

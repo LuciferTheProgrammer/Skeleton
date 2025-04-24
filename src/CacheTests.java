@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CacheTests {
 
     /**
-     * This method to test the performance using a test program of summing 20 integers in an array.
+     * This method checks the performance by using a test program of summing 20 integers in an array.
      * Measures clock cycle count, checks elements of the array, and also the total sum of the array.
      * Case 1: Summing 20 integers in an array.
      */
@@ -20,27 +20,33 @@ public class CacheTests {
                 "multiply 4 r6",    // Line 2
                 "copy r6 r0",       // Give address space 400 to r0
                 "copy r6 r0",       // Line 3 - Dummy
-                "copy 15 r1",       // Data for each element in the array
+                "copy 15 r1",       // Constant value for each element in the array
                 "copy 10 r2",       // Line 4
                 "multiply 2 r2",    // Length 20 for the array
                 "copy 1 r5",        // Line 5
                 "store r1 r0",      // Stores value 15 in memory at address 400
-                "add r5 r0",        // Line 6 - increment pointer by 1 to the next memory address
+                "add r5 r0",        // Line 6 - increment the pointer by 1 to the next memory address
+                "copy 1 r5",
+                "copy 1 r5",        // Line 7 - Dummy
+                "copy 1 r5",
+                "copy 1 r5",        // Line 8 - Dummy
                 "subtract 1 r2",    // Decrement length counter by 1
-                "compare 0 r2",     // Line 7 - checks if the length counter of the array is 0
-                "bne -2",           // If the array is still not fully processed, loop back to line 5
-                "copy 10 r0",       // Line 8
+                "compare 0 r2",     // Line 9 - checks if the length counter of the array is 0
+                "bne -4",           // If the array is still not fully processed, loop back to line 5
+                "copy 10 r0",       // Line 10
                 "multiply 10 r0",
-                "multiply 4 r0",     // Line 9 - Give address space 400 to r0
+                "multiply 4 r0",     // Line 11 - Give address space 400 to r0
                 "copy 10 r2",
-                "multiply 2 r2",     // Line 10 - Length 20
+                "multiply 2 r2",     // Line 12 - Length 20
                 "copy 0 r3",         // Accumulator initialized to 0
-                "load r0 r4",        // Line 11 - load the value on memory address 400 into r4
+                "load r0 r4",        // Line 13 - load the value on memory address 400 into r4
                 "add r4 r3",         // Add value to the accumulator
-                "add r5 r0",         // Line 12 - increment pointer by 1 to the next memory address
+                "add r5 r0",         // Line 14 - increment the pointer by 1 to the next memory address
+                "copy 1 r5",
+                "copy 1 r5",         // Line 15 - Dummy
                 "subtract 1 r2",     // Decrement length counter by 1
-                "compare 0 r2",      // Line 13 - checks if the length counter of the array is 0
-                "bne -2",            // If the array is still not fully processed, loop back to line 11
+                "compare 0 r2",      // Line 16 - checks if the length counter of the array is 0
+                "bne -3",            // If the array is still not fully processed, loop back to line 13
                 "halt"
         };
         System.out.println("Case 1: Array of size 20 and sum: ");
@@ -56,42 +62,47 @@ public class CacheTests {
         assertEquals("415:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,t,t,", processor1.output.get(15));
     }
 
-    // Case 2:
+    /**
+     * This method checks the performance by using a test program of creating a 20-item linked list of numbers
+     * and summing them. Measures clock cycle count, checks data fields of the nodes, checks the pointer to the next
+     * to the next node (memory address), and also the total sum of the linked list.
+     * Case 2: Creating a 20-item linked list of numbers and summing them.
+     */
     @Test
     public void LinkedListTest() {
         String[] LinkedList = {
-                "copy 10 r0",
+                "copy 10 r0",       // Line 1
                 "multiply 10 r0",
-                "multiply 4 r0", // Get Address Space 400 to r0.
+                "multiply 4 r0",    // Line 2 - Give Address Space 400 to r0
                 "copy r0 r7",
-                "copy 2 r1", // Node size (1 32 word for data and 1 32 word for reference)
+                "copy 2 r1",        // Line 3 - Node size (1 32 word for data and 1 32 word for reference)
                 "copy 5 r2",
-                "leftshift 2 r2",  // Length 20
-                "copy 10 r3", // Constant value to be stored on data fields.
-                "store r3 r0",
-                "copy r0 r4",
-                "add 1 r4",
-                "copy r0 r5",
-                "add r1 r5",
-                "store r5 r4",
-                "copy r5 r0",
-                "subtract 1 r2",
-                "compare 0 r2",
-                "bne -4",
-                "subtract r1 r0", // Address 440-2 = 438 + 1 = 439 -> 0
-                "add 1 r0",
-                "copy 0 r6",
-                "store r6 r0",
-                "copy r7 r0",
-                "copy 0 r3",
-                "load r0 r4", // line 1
-                "add r4 r3",
-                "copy r0 r5",
-                "add 1 r5",  // line 2
-                "load r5 r0",
-                "copy 0 r2", // Dummy
-                "compare 0 r0", // line 3
-                "bne -3",
+                "leftshift 2 r2",   // Line 4 - Length 20 for the linked list
+                "copy 10 r3",       // Constant value to be stored on data fields of the nodes
+                "store r3 r0",      // Line 5 - Stores value 10 in memory address 400
+                "copy r0 r4",       // Copy the node's base address to r4
+                "add 1 r4",         // Line 6 - Increment by 1 to the next memory address (next field), which contains the reference to the next node
+                "copy r0 r5",       // Copy node's base address to r5
+                "add r1 r5",        // Line 7 - Increment by 2 to the next memory address, the next new node
+                "store r5 r4",      // Stores the memory address of the new node to the previous node's next field (reference)
+                "copy r5 r0",       // Line 8 - Move the pointer to the next node
+                "subtract 1 r2",    // Decrement the length counter by 1
+                "compare 0 r2",     // Line 9 - checks if the length counter of the array is 0
+                "bne -4",           // If the linked list is still not fully processed, loop back to line 5
+                "subtract r1 r0",   // Line 10 - Moves the pointer to the last node
+                "add 1 r0",         // Increment the pointer by 1 to the next memory address, which is the last node's next field
+                "copy 0 r6",        // Line 11
+                "store r6 r0",      // Stores the default value of 0 in the last node's next field, which is a null pointer
+                "copy r7 r0",       // Line 12 - Move the pointer back to the first head node.
+                "copy 0 r3",        // Initialize the accumulator to 0
+                "load r0 r4",       // Line 13 - load the value in memory address 400 (data field) into r4
+                "add r4 r3",        // Add the value to the accumulator
+                "copy r0 r5",       // Line 14 - copies over the current node address to r5
+                "add 1 r5",         // Increments the pointer by 1 to the next memory address, which is the next field
+                "load r5 r0",       // Line 15 - load the value in memory address r5 (next pointer) into r0
+                "copy 0 r2",        // Dummy
+                "compare 0 r0",     // Line 16 - checks if the next pointer is null, which means the end of the linked list has been reached.
+                "bne -3",           // If the linked list has not been fully processed, loop back to line 13
                 "halt"
         };
         System.out.println("Case 2: LinkedList of size 20 and sum: ");
@@ -107,8 +118,9 @@ public class CacheTests {
         assertEquals("402:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,f,t,f,", processor2.output.get(2));
         assertEquals("403:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,f,t,f,t,f,f,", processor2.output.get(3));
     }
+
     /**
-     * This method to test the performance using a test program of summing 20 integers in an array backwards.
+     * This method checks the performance by using a test program of summing 20 integers in an array backwards.
      * Measures clock cycle count, checks elements of the array, and also the total sum of the array.
      *  Case 3: Summing 20 integers in an array backwards (end to beginning).
      */
@@ -118,33 +130,39 @@ public class CacheTests {
                 "copy 10 r0",       // Line 1
                 "multiply 10 r0",
                 "multiply 4 r0",    // Line 2 - Give address space 400 to r0
-                "copy 6 r1",        // Data for each element in the array
+                "copy 6 r1",        // Constant value for each element in the array
                 "copy 10 r2",       // Line 3
                 "multiply 2 r2",    // Length 20 for the array
                 "copy 1 r5",        // Line 4
                 "store r1 r0",      // Store value 6 in the memory address 400
                 "add r5 r0",        // Line 5 - increment the pointer by 1 to the next memory address
+                "copy 1 r5",
+                "copy 1 r5",        // Line 6 - Dummy
+                "copy 1 r5",
+                "copy 1 r5",        // Line 7 - Dummy
                 "subtract 1 r2",    // Decrement the length counter by 1
-                "compare 0 r2",     // Line 6 - checks if the length counter of the array is 0
-                "bne -2",           // If the array is still not fully processed, loop back to line 4
-                "copy 10 r6",       // Line 7
+                "compare 0 r2",     // Line 8 - checks if the length counter of the array is 0
+                "bne -4",           // If the array is still not fully processed, loop back to line 4
+                "copy 10 r6",       // Line 9
                 "multiply 10 r6",
-                "multiply 2 r6",    // Line 8
+                "multiply 2 r6",    // Line 10
                 "multiply 2 r6",
-                "add 15 r6",        // Line 9 - Get address space 419
+                "add 15 r6",        // Line 11 - Get address space 419
                 "add 4 r6",
-                "copy 0 r0",        // Line 10
+                "copy 0 r0",        // Line 12
                 "copy 0 r0",
-                "add r6 r0",        // Line 11 - Give address space 419 to r0
+                "add r6 r0",        // Line 13 - Give address space 419 to r0
                 "copy 10 r2",
-                "multiply 2 r2",    // Line 12 - Length 20 for the array
+                "multiply 2 r2",    // Line 14 - Length 20 for the array
                 "copy 0 r3",        // Initialize the accumulator
-                "load r0 r4",       // Line 13 - load the value in memory address 419 to r4
+                "load r0 r4",       // Line 15 - load the value in memory address 419 to r4
                 "add r4 r3",        // Add the value to the accumulator
-                "subtract r5 r0",   // Line 14 - decrement the pointer by 1 to the next memory address
+                "subtract r5 r0",   // Line 16 - decrement the pointer by 1 to the next memory address
+                "copy 1 r5",
+                "copy 1 r5",        // Line 17 - Dummy
                 "subtract 1 r2",    // Decrement the length counter by 1
-                "compare 0 r2",     // Line 15 - checks if the length counter of the array is 0
-                "bne -2",           // If the array is still not fully processed, loop back to line 13
+                "compare 0 r2",     // Line 18 - checks if the length counter of the array is 0
+                "bne -3",           // If the array is still not fully processed, loop back to line 15
                 "halt"
         };
         System.out.println("Case 3: Array of size 20 and sum backwards: ");
@@ -159,6 +177,13 @@ public class CacheTests {
         assertEquals("419:f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,f,t,t,f,", processor3.output.get(19));
     }
 
+    /**
+     * The method that executes the processor program.
+     *
+     * @param placement The array of strings that contains sets of instructions.
+     *
+     * @return The processor that runs the program.
+     */
     private static Processor runMyPro(String[] placement) {
         var assembled = Assembler.assemble(placement);
         var merged = Assembler.finalOutput(assembled);
