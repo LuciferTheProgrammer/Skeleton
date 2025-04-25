@@ -289,12 +289,9 @@ public class Processor {
     private void printMem() {
         for (int i = 0; i < 1000; i++) {
             Word32 addr = new Word32();
-            Word32 value = new Word32();
             // Convert i to Word32 here...
             TestConverter.fromInt(i, addr);
-            addr.copy(mem.address);
-            mem.read();
-            mem.value.copy(value);
+            Word32 value = l2Cache.read(addr);
             //var line = i + ":" + value + "(" + TestConverter.toInt(value) + ")";
             var line = i + ":" + value.toString();
             output.add(line);
@@ -489,11 +486,8 @@ public class Processor {
     public void printMyArrayMemory() {
         for (int i = 400; i < 450; i++) {
             Word32 addr = new Word32();
-            Word32 value = new Word32();
             TestConverter.fromInt(i, addr);
-            addr.copy(mem.address);
-            mem.read();
-            mem.value.copy(value);
+            Word32 value = l2Cache.read(addr);
             var line = i + ":" + value.toString();
             output.add(line);
             int holder = TestConverter.toInt(value);
