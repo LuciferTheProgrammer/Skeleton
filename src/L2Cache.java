@@ -56,7 +56,6 @@ public class L2Cache {
         for(int i = 0; i < 4; i++) {
             int container = TestConverter.toInt(tagHolder[i]);
             if (start == container) {
-                Processor.currentClockCycle += 50;
                 return cache[i][target];
             }
         }
@@ -68,7 +67,6 @@ public class L2Cache {
             mem.value.copy(cache[eviction][i]);
         }
         TestConverter.fromInt(start, tagHolder[eviction]);
-        Processor.currentClockCycle += 50;
         return cache[eviction][target];
     }
 
@@ -86,7 +84,6 @@ public class L2Cache {
         destination.copy(mem.address);
         source.copy(mem.value);
         mem.write();
-        Processor.currentClockCycle += 50;
     }
 
     /**

@@ -263,9 +263,11 @@ public class Processor {
                 Adder.add(op2, op1, container);
             }
             result = l2Cache.read_Data(container);
+            currentClockCycle += 50;
         }
         else if(opCode == 19) {
             l2Cache.write_Data(op2, op1);
+            currentClockCycle += 50;
         }
         else if(opCode == 20) {
             op2.copy(result);
