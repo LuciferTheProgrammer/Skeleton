@@ -62,7 +62,6 @@ public class L2Cache {
         }
         int eviction = queueReplacements;
         queueReplacements = (queueReplacements + 1) % 4;
-        Processor.currentClockCycle += 350;
         for(int i = 0; i < 8; i++) {
             TestConverter.fromInt(start + i, mem.address);
             mem.read();
