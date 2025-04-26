@@ -138,7 +138,9 @@ public class Processor {
     private void fetch() {
         if(flagger == 0) {
             buffer = new Word32();
-            buffer = instructionCache.read(PC);
+            instructionCache.setAddress(PC);
+            instructionCache.read();
+            instructionCache.getValue(buffer);
             buffer.getTopHalf(instructions);
             flagger = 1;
             status = true;
@@ -260,10 +262,10 @@ public class Processor {
             else if(instructions.word16[5].getValue() == Bit.boolValues.TRUE) {
                 Adder.add(op2, op1, container);
             }
-            result = l2Cache.read(container);
+            result = l2Cache.read_Data(container);
         }
         else if(opCode == 19) {
-            l2Cache.write(op2, op1);
+            l2Cache.write_Data(op2, op1);
         }
         else if(opCode == 20) {
             op2.copy(result);
@@ -291,7 +293,7 @@ public class Processor {
             Word32 addr = new Word32();
             // Convert i to Word32 here...
             TestConverter.fromInt(i, addr);
-            Word32 value = l2Cache.read(addr);
+            Word32 value = l2Cache.mem_read_Debug(addr);
             //var line = i + ":" + value + "(" + TestConverter.toInt(value) + ")";
             var line = i + ":" + value.toString();
             output.add(line);
@@ -487,7 +489,7 @@ public class Processor {
         for (int i = 400; i < 450; i++) {
             Word32 addr = new Word32();
             TestConverter.fromInt(i, addr);
-            Word32 value = l2Cache.read(addr);
+            Word32 value = l2Cache.mem_read_Debug(addr);
             var line = i + ":" + value.toString();
             output.add(line);
             int holder = TestConverter.toInt(value);

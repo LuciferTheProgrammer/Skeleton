@@ -5,95 +5,102 @@
 public class L2Cache {
 
     // The cache to hold 32 total word instructions, size of 4 by 8.
-    private Word32[][] instruction_holder;
+    private Word32[][] cache;
 
     // Indicates which addresses are in the cache.
-    private Word32[] presence;
+    private Word32[] tagHolder;
 
     // The memory instance to read from and write to.
     private Memory mem;
 
-    /**
-     * This constructor takes in a memory instance and sets it to the memory instance field.
-     * It also initializes the 4 by 8 array, the cache, with Word32 instances. It also
-     * initializes the presence array with Word32 instances and sets those words to represent
-     * -1 which indicates that no addresses are in the cache.
-     *
-     * @param map
-     */
-    public L2Cache(Memory map) {
-        mem = map;
-        instruction_holder = new Word32[4][8];
-        for (int i = 0; i < 4; i++) {
-            for (int k = 0; k < 8; k++) {
-                instruction_holder[i][k] = new Word32();
+    private int queueReplacements;
+
+
+    public L2Cache(Memory mem) {
+        this.mem = mem;
+        cache = new Word32[4][8];
+        tagHolder = new Word32[4];
+        for(int i = 0; i < 4; i++){
+            tagHolder[i] = new Word32();
+            TestConverter.fromInt(-1, tagHolder[i]);
+            for(int k = 0; k < 8; k++) {
+                cache[i][k] = new Word32();
             }
         }
-        presence = new Word32[4];
-        for (int i = 0; i < 4; i++) {
-            presence[i] = new Word32();
-            TestConverter.fromInt(-1, presence[i]);
-        }
+        queueReplacements = 0;
     }
-
-    /**
-     * This method takes in an address and then uses the address to compute which of the
-     * four slots to use for the presence array, uses this newly computed value as an index in presence
-     * to check if the desired block address is there. The use of the L2 Cache by the Instruction
-     * Cache adds 20 clock cycles. If the desired address matches computed flag value from
-     * the presence array, then it is a cache hit and the corresponding subset value that was computed
-     * at first is used as an index in the cache to return the corresponding 8 words. Otherwise,
-     * it is a cache miss, it adds 350 clock cycles and refills the of the groups of 8 words
-     * from the main memory. Then the group with the refilled 8 words is returned.
-     *
-     * @param address The memory address of the desired 8 words.
-     * @return The 8 words from the cache.
-     */
-    public Word32[] read_Through(int address) {
-        int subset = (address / 8) % 4;
-        int flag = TestConverter.toInt(presence[subset]);
+    public Word32[] L2_read(int address) {
         Processor.currentClockCycle += 20;
-        if (address != flag) {
-            Processor.currentClockCycle += 350;
-            TestConverter.fromInt(address, presence[subset]);
-            for (int i = 0; i < 8; i++) {
-                TestConverter.fromInt(address + i, mem.address);
-                mem.read();
-                mem.value.copy(instruction_holder[subset][i]);
+        int start = (address / 8) * 8;
+        for(int i = 0; i < 4; i++) {
+            int flag = TestConverter.toInt(tagHolder[i]);
+            if(start == flag) {
+                return cache[i];
             }
         }
-        return instruction_holder[subset];
+        Processor.currentClockCycle += 350;
+        int eviction = queueReplacements;
+        queueReplacements = (queueReplacements  + 1) % 4;
+        for(int i = 0; i < 8; i++) {
+            TestConverter.fromInt(start + i, mem.address);
+            mem.read();
+            mem.value.copy(cache[eviction][i]);
+        }
+        TestConverter.fromInt(start, tagHolder[eviction]);
+        return cache[eviction];
     }
-
-    /**
-     * This method takes in a Word32 instance, reads
-     * from the main memory and then returns the data stored in the address specified
-     * by the word instance. This also adds 50 clock cycles. Used for load.
-     *
-     * @param sample The word address.
-     * @return The data stored in the address specified by the word instance.
-     */
-    public Word32 read(Word32 sample) {
-        Word32 temp = new Word32();
-        sample.copy(mem.address);
-        mem.read();
+    public Word32 read_Data(Word32 taker) {
+        int address = TestConverter.toInt(taker);
+        int start = (address / 8) * 8;
+        int target = address % 8;
+        for(int i = 0; i < 4; i++) {
+            int container = TestConverter.toInt(tagHolder[i]);
+            if (start == container) {
+                Processor.currentClockCycle += 50;
+                return cache[i][target];
+            }
+        }
+        int eviction = queueReplacements;
+        queueReplacements = (queueReplacements + 1) % 4;
+        Processor.currentClockCycle += 350;
+        for(int i = 0; i < 8; i++) {
+            TestConverter.fromInt(start + i, mem.address);
+            mem.read();
+            mem.value.copy(cache[eviction][i]);
+        }
+        TestConverter.fromInt(start, tagHolder[eviction]);
         Processor.currentClockCycle += 50;
-        mem.value.copy(temp);
-        return temp;
+        return cache[eviction][target];
     }
 
-    /**
-     * This method takes in two Word32 instances, the address specified by the word destination
-     * is where data represented by the word source is stored/written to the main memory.
-     * This also adds 50 clock cycles. Used for store.
-     *
-     * @param sample1 The word destination for the address in memory.
-     * @param sample2 The word source data to be stored in the address in memory.
-     */
-    public void write(Word32 sample1, Word32 sample2) {
-        sample1.copy(mem.address);
-        sample2.copy(mem.value);
+    public void write_Data(Word32 destination, Word32 source) {
+        int address = TestConverter.toInt(destination);
+        int start = (address / 8) * 8;
+        int target = address % 8;
+        for (int i = 0; i < 4; i++) {
+            int holder = TestConverter.toInt(tagHolder[i]);
+            if (holder == start) {
+                source.copy(cache[i][target]);
+                break;
+            }
+        }
+        destination.copy(mem.address);
+        source.copy(mem.value);
         mem.write();
         Processor.currentClockCycle += 50;
     }
+
+    /**
+     * This method is used for debugging purposes only. To help load contents from memory and
+     * help print it for printMem() and printArrayMemory().
+     *
+     */
+    public Word32 mem_read_Debug(Word32 sample) {
+        sample.copy(mem.address);
+        mem.read();
+        Word32 temp = new Word32();
+        mem.value.copy(temp);
+        return temp;
+    }
 }
+
