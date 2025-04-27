@@ -50,13 +50,13 @@ public class L2Cache {
         return cache[eviction];
     }
     public Word32 read_Data(Word32 taker) {
+        Processor.currentClockCycle += 50;
         int address = TestConverter.toInt(taker);
         int start = (address / 8) * 8;
         int target = address % 8;
         for(int i = 0; i < 4; i++) {
             int container = TestConverter.toInt(tagHolder[i]);
             if (start == container) {
-                Processor.currentClockCycle += 50;
                 return cache[i][target];
             }
         }
@@ -68,11 +68,11 @@ public class L2Cache {
             mem.value.copy(cache[eviction][i]);
         }
         TestConverter.fromInt(start, tagHolder[eviction]);
-        Processor.currentClockCycle += 50;
         return cache[eviction][target];
     }
 
     public void write_Data(Word32 destination, Word32 source) {
+        Processor.currentClockCycle += 50;
         int address = TestConverter.toInt(destination);
         int start = (address / 8) * 8;
         int target = address % 8;
@@ -86,7 +86,6 @@ public class L2Cache {
         destination.copy(mem.address);
         source.copy(mem.value);
         mem.write();
-        Processor.currentClockCycle += 50;
     }
 
     /**
