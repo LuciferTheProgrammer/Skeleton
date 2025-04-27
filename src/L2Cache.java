@@ -60,6 +60,7 @@ public class L2Cache {
                 return cache[i][target];
             }
         }
+        Processor.currentClockCycle += 350;
         int eviction = queueReplacements;
         queueReplacements = (queueReplacements + 1) % 4;
         for(int i = 0; i < 8; i++) {
