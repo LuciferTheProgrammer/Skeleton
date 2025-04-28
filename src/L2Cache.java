@@ -1,8 +1,8 @@
 
 // The L2 Cache is responsible for reading instructions from the main memory and then
-// returning those desired word instructions to Instruction Cache. It also handles
-// reading from and writing data to the cache and main memory when the processor uses load/store.
-// This cache also implements a Set Way Associative Mapping.
+// returning those desired word instructions to the Instruction Cache. It also handles
+// reading from and writing data to the Cache and main memory when the processor uses load/store.
+// This Cache also implements a Set Way Associative Mapping.
 public class L2Cache {
 
     // The cache to hold 32 total word instructions, size of 4 by 8.
@@ -18,7 +18,9 @@ public class L2Cache {
     private int[] queue;
 
     /**
-     * This constructor
+     * This constructor takes in a Memory instance and sets it to its Memory instance field.
+     * This also initializes the Caches with 32 words and the tags to be empty, values of
+     * -1. It also sets the array of queue to the starting point of 0.
      */
     public L2Cache(Memory mem) {
         this.mem = mem;
@@ -33,6 +35,13 @@ public class L2Cache {
         }
         queue = new int[2];
     }
+
+    /**
+     * This method
+     *
+     * @param address
+     * @return
+     */
     public Word32[] L2_read(int address) {
         Processor.currentClockCycle += 20;
         int tagBlock = (address / 8);
