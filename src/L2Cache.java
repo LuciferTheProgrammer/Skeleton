@@ -37,10 +37,16 @@ public class L2Cache {
     }
 
     /**
-     * This method
+     * This method charges 20 clock cycles for accessing L2, then takes in an address which is used
+     * to compute for the block number, then using that result computes the block's starting
+     * address, computes for the set either 0 or 1, and finally finds the index in the derived set.
+     * This method also checks for a tag match in both ways, for a Cache hit. If there is a
+     * Cache hit the target block of 8-words is returned. Otherwise, it's a Cache miss and 350
+     * clock cycles are added, the FIFO pointer is updated, a block of 8-words is read from main
+     * memory, the tag is updated, and the target block of 8-words is returned.
      *
-     * @param address
-     * @return
+     * @param address The memory address to be read from.
+     * @return The target 8-word block.
      */
     public Word32[] L2_read(int address) {
         Processor.currentClockCycle += 20;
@@ -67,6 +73,18 @@ public class L2Cache {
         return cache[container];
     }
 
+    /**
+     * This method adds 50 clock cycles, takes in an address to compute the block number,
+     * then using that result computes the block's starting address, computes for the index
+     * of the desired word within the block, computes for the set either 0 or 1, and finally
+     * finds the index in the derived set. This method also checks for a Cache hit, if there is
+     *  one, then the target word is returned. Otherwise, it's a Cache miss, 350 clock cycles are added,
+     * the FIFO pointer is updated, a block of 8-words is read from main memory, the tag is updated,
+     * and the target word is returned.
+     *
+     * @param taker The memory address to be read from.
+     * @return The target word.
+     */
     public Word32 read_Data(Word32 taker) {
         Processor.currentClockCycle += 50;
         int address = TestConverter.toInt(taker);
@@ -95,6 +113,17 @@ public class L2Cache {
         return cache[container][target];
     }
 
+    /**
+     * This method adds 50 clock cycles, takes in an address (destination) to compute the block number,
+     * then using that result computes the block's starting address, computes for the index
+     * of the desired word within the block, computes for the set either 0 or 1, and finally
+     * finds the index in the derived set. This method also checks if there is a Cache hit, then
+     * the block is present, and the target word is updated by the source word. Otherwise,
+     * we write through main memory.
+     *
+     * @param destination The memory address to be written to.
+     * @param source The value to be written to the memory address.
+     */
     public void write_Data(Word32 destination, Word32 source) {
         Processor.currentClockCycle += 50;
         int address = TestConverter.toInt(destination);
@@ -103,7 +132,6 @@ public class L2Cache {
         int target = address % 8;
         int index = tagBlock % 2;
         int base = 2 * index;
-
         for(int i = 0; i < 2; i++) {
             int holder = TestConverter.toInt(tagHolder[base + i]);
             if(holder == starter) {
