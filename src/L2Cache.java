@@ -1,14 +1,14 @@
 
 // The L2 Cache is responsible for reading instructions from the main memory and then
 // returning those desired word instructions to the Instruction Cache. It also handles
-// reading from and writing data to the Cache and main memory when the processor uses load/store.
+// reading and writing of data to itself (Cache) and main memory when the processor uses load/store.
 // This Cache also implements a Set Way Associative Mapping.
 public class L2Cache {
 
-    // The cache to hold 32 total word instructions, size of 4 by 8.
+    // The Cache to hold 32 total word instructions, size of 4 by 8.
     private Word32[][] cache;
 
-    // Indicates which addresses are in the cache.
+    // Indicates which addresses are in the Cache.
     private Word32[] tagHolder;
 
     // The memory instance to read from and write to.
@@ -118,8 +118,8 @@ public class L2Cache {
      * then using that result computes the block's starting address, computes for the index
      * of the desired word within the block, computes for the set either 0 or 1, and finally
      * finds the index in the derived set. This method also checks if there is a Cache hit, then
-     * the block is present, and the target word is updated by the source word. Otherwise,
-     * we write through main memory.
+     * the block is present, and the target word is updated by the source word (optional).
+     * Otherwise, we always write through main memory.
      *
      * @param destination The memory address to be written to.
      * @param source The value to be written to the memory address.
@@ -127,7 +127,7 @@ public class L2Cache {
     public void write_Data(Word32 destination, Word32 source) {
         Processor.currentClockCycle += 50;
         int address = TestConverter.toInt(destination);
-        int tagBlock = address /8;
+        int tagBlock = address / 8;
         int starter = 8 * tagBlock;
         int target = address % 8;
         int index = tagBlock % 2;
@@ -157,4 +157,3 @@ public class L2Cache {
         return temp;
     }
 }
-

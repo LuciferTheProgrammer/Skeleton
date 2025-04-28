@@ -39,7 +39,7 @@ public class InstructionCache {
     /**
      * This method uses the program counter to compute the start address of the 8-word block
      * of the Cache. Then it compares that value to the converted tag value to check if there
-     * is a Cache hit, meaning if the desired block is already loaded, if it is then 10 clock cycles
+     * is a Cache hit, meaning if the desired block is already loaded, then 10 clock cycles
      * are added and then the target word is retrieved within the block and copied to the value field where
      * it can be fetched. Otherwise, the Instruction Cache consults with the L2 Cache where
      * L2 refills the entire 8-word block of the Instruction Cache with the desired word. Right after,
