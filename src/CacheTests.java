@@ -107,7 +107,7 @@ public class CacheTests {
                 "bne -3",           // If the linked list has not been fully processed, loop back to line 13
                 "halt"
         };
-        System.out.println("Case 2: LinkedList of size 20 and sum: ");
+        System.out.println("Case 2: LinkedList of 20 items and sum: ");
         var processor2 = runMyPro(LinkedList);
         Word32[] r = processor2.getRegisters();
         System.out.println("baseAddressHolder: " + TestConverter.toInt(r[7]));
