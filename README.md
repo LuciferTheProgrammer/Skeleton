@@ -1,4 +1,5 @@
 # ICSI404 - Computer Architecture and Organization
+Applications are contained in the src folder.
 
 ## Java Processor and Computer Architecture Simulator
 
